@@ -1,19 +1,17 @@
-/*
- * ARDUINO RELAY TIMER - September 25th 2018
- */
+// * ARDUINO RELAY TIMER - September 25th 2018
 
 #include "header.h"
-#include "loadSystemData.h"
-#include "getDate.h"
-#include "getReceivedText.h"
+#include "utils.h"
+#include "getters.h"
 #include "parseReceivedText.h"
-#include "printPrompt.h"
-#include "printData.h"
+#include "printFunctions.h"
 #include "closeConnection.h"
 #include "setParam.h"
 #include "saveData.h"
 #include "arrayToString.h"
 #include "checkRelays.h"
+#include "addRelay.h"
+#include "deleteRelay.h"
 
 void setup() {
   // In order to reset to work, a 1k resistor must be placed between the reset pin
@@ -24,18 +22,18 @@ void setup() {
   
   Serial.begin(9600);
 
-  Serial.print("Starting I2C port: ");
+  Serial.print(F("Starting I2C port: "));
   Wire.begin();
-  Serial.println("done...\n");
+  Serial.println(F("done...\n"));
 
-  Serial.print("Starting RTC clock: ");
+  Serial.print(F("Starting RTC clock: "));
   RTC.begin();
-  Serial.println("done...\n");
+  Serial.println(F("done...\n"));
 
   // Start the telnet server
-  Serial.print("Starting telnet server: ");
+  Serial.print(F("Starting telnet server: "));
   server.begin();
-  Serial.println("done....\n");
+  Serial.println(F("done....\n"));
   
   loadSystemData();
 }
@@ -47,11 +45,11 @@ void loop() {
     connectFlag = 1;
     client = server.available();
     client.flush();
-    client.println("ARDUINO RELAY TIMER");
+    client.println(F("ARDUINO RELAY TIMER"));
     client.print(BOARD);
     client.println(" - " + String(sys.hostName));
     client.println("Version " + sysVersion);
-    client.println("'help' para mostrar comandos");
+    client.println(F("Type 'help' to show all commands"));
     client.flush();
     printPrompt();
   }
@@ -75,7 +73,7 @@ void checkConnectionTimeout()
 {
   if(millis() - timeOfLastActivity > allowedConnectTime) {
     client.println();
-    client.println("Timeout disconnect.");
+    client.println(F("Timeout disconnect."));
     client.stop();
     connectFlag = 0;
   }

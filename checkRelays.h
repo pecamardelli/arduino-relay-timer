@@ -1,18 +1,17 @@
 void checkRelays() {
   DateTime now = RTC.now();
-  int startmins, endmins, actualmins;
+  int startMins, endMins, currentMins;
 
   aux = first;
-  
   while(aux != NULL) {
     if(aux->relay.enabled && !aux->relay.deleted && !aux->overrided) {
-      startmins   = aux->relay.startHour * 60 + aux->relay.startMin;
-      endmins     = aux->relay.endHour * 60 + aux->relay.endMin;
-      actualmins  = now.hour() * 60 + now.minute();
+      startMins   = aux->relay.startHour * 60 + aux->relay.startMin;
+      endMins     = aux->relay.endHour * 60 + aux->relay.endMin;
+      currentMins  = now.hour() * 60 + now.minute();
 
-      if(startmins <= actualmins) {
-        if(endmins > startmins) {
-          if(endmins < actualmins) {
+      if(startMins <= currentMins) {
+        if(endMins > startMins) {
+          if(endMins < currentMins) {
             digitalWrite(aux->relay.pin, HIGH);
           }
           else {
@@ -24,11 +23,11 @@ void checkRelays() {
         }
       }
       else {
-        if(startmins < endmins) {
+        if(startMins < endMins) {
           digitalWrite(aux->relay.pin, HIGH);
         }
         else {          
-          if(endmins > actualmins) {
+          if(endMins > currentMins) {
             digitalWrite(aux->relay.pin, LOW);
           }
           else {

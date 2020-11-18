@@ -4,8 +4,8 @@ void setParam(String param, String source) {
     bool match  = false;
     int num     = param.substring(5, 7).toInt();
     //printData(source, String(num) + "-" + param, true);
+    
     aux = first;
-  
     while(aux != NULL) {
       if(aux->relay.pin == num) {
         match = true;
@@ -15,7 +15,8 @@ void setParam(String param, String source) {
     }
 
     if(!match) {
-      printData(source, "No relay found at pin " + String(num), true); return;
+      printData(source, "No relay found at pin " + String(num), true);
+      return;
     }
 
     //printData(source, "Success! " + String(num), true); return;

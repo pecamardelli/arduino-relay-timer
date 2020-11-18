@@ -13,11 +13,16 @@ void getReceivedText(String source);
 void parseReceivedText(String source);
 void printPrompt();
 void printData(String source, String data, bool rc);
+void printHelp(String source);
+void printIpAddress(String source);
 void closeConnection();
 void setParam(String param, String source);
 void saveData(String source);
 String arrayToString(byte array[], unsigned int len);
 void checkRelays();
+void getRelayInfo(String source);
+void addRelay(String source);
+void deleteRelay(String source);
 
 // ----------- BOARD TYPES ----------- //
 
@@ -101,7 +106,7 @@ typedef struct node {
     byte    memPos;
     bool    changeFlag;
     bool    overrided;
-    struct node * next;
+    struct  node * next;
 } node_t;
 
 node_t *first = NULL, *last = NULL, *aux = NULL;
@@ -122,8 +127,8 @@ struct  systemData sys;
 int     eeAddress       = 0;
 bool    sysChangeFlag   = false;
 String  days[]          = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
-String  sysVersion      = "1.5";
-String  estados[]       = { "ON", "OFF" };
+String  sysVersion      = "1.6";
+String  statuses[]       = { "ON", "OFF" };
 int     resetPin        = 9;
 unsigned long tstamp    = 0;
 int     unusablePins[]  = { 9, 10, 11, 12, 13 };
