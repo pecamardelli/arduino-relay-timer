@@ -1,5 +1,6 @@
 void parseReceivedText(String source)
 {
+  printData(source, "", true);  // Imprimimos una línea en blanco para que se vea mejor.
   if(textBuff.substring(0,4) == "help")
   {
     printData(source, "time\t\t\t-->\tDevuelve la hora actual.", true);
@@ -9,8 +10,7 @@ void parseReceivedText(String source)
     printData(source, "addrelay (0-50)\t\t-->\tAgrega un nuevo rele en el pin indicado.", true);
     printData(source, "delrelay (0-50)\t\t-->\tElimina el rele en el pin indicado.", true);
     printData(source, "set (parametro)\t\t-->\tCambiar un parametro del sistema. 'set help' para ver opciones.", true);
-    printData(source, "hostname\t\t-->\tMuestra el nombre del sistema.", true);
-    printData(source, "ip\t\t\t-->\tMuestra la configuracion de IP actual.", true);
+    printData(source, "sysinfo\t\t\t-->\tMuestra la información del sistema.", true);
     printData(source, "version\t\t\t-->\tMuestra la version actual del sistema.", true);
     printData(source, "save\t\t\t-->\tGuarda los cambios.", true);
     printData(source, "reboot\t\t\t-->\tReinicia el sistema.", true);
@@ -31,7 +31,7 @@ void parseReceivedText(String source)
   }
   else if(textBuff.substring(0,9) == "relayinfo")
   {
-    printData(source, "PIN\tENABLED\tDESCRIPTION\t\tSTARTH\tSTARTM\tENDH\tENDM\tSTATUS", true);
+    printData(source, "PIN\tENABLED\tDESCRIPTION\t\tSTARTH\tSTARTM\tENDH\tENDM\tSTATUS\tUPTIME", true);
     
     aux = first;
     String var = "";
@@ -40,12 +40,12 @@ void parseReceivedText(String source)
     {
       if(!aux->relay.deleted)
       {
+        var = String(aux->relay.desc);
+               
         printData(source, String(aux->relay.pin) + "\t", false);
         printData(source, String(aux->relay.enabled) + "\t", false);
-        printData(source, String(aux->relay.desc), false);
+        printData(source, var, false);
         
-        var = String(aux->relay.desc);
-  
         if(var.length() < 8)
         {
           printData(source, "\t\t\t", false);
@@ -64,6 +64,7 @@ void parseReceivedText(String source)
         printData(source, String(aux->relay.endHour) + "\t", false);
         printData(source, String(aux->relay.endMin) + "\t", false);
         printData(source, estados[digitalRead(aux->relay.pin)] + "\t", false);
+        printData(source, uptimeToString(aux->uptime), false);
 
         if(aux->changeFlag)
         {
@@ -83,17 +84,18 @@ void parseReceivedText(String source)
   {
     saveData(source);
   }
-  else if(textBuff.substring(0,8) == "hostname")
-  {
-    printData(source, sys.hostName, true);
-  }
   else if(textBuff.substring(0,7) == "version")
   {
     printData(source, "ARDUINO RELAY TIMER Version " + sysVersion, true);
   }
-  else if(textBuff.substring(0,2) == "ip")
+  else if(textBuff.substring(0,7) == "sysinfo")
   {
-    printData(source, "\nMAC:\t\t" +
+    printData(source, "NOMBRE:\t" + String(sys.hostName), true);
+    printData(source, "UPTIME:\t" + uptimeToString(millis()), true);
+    printData(source, "PLACA:\tARDUINO " + String(BOARD), true);
+    printData(source, "", true);
+    
+    printData(source, "MAC:\t\t" +
                   String(sys.mac[0], HEX) + ":" +
                   String(sys.mac[1], HEX) + ":" +
                   String(sys.mac[2], HEX) + ":" +
@@ -130,7 +132,7 @@ void parseReceivedText(String source)
 
     if(match)
     {
-      printData(source, "El pin " + String(pin) + " es inusalbe.", true);
+      printData(source, "El pin " + String(pin) + " es inusable.", true);
       return;
     }
     
@@ -245,15 +247,68 @@ void parseReceivedText(String source)
   {
     digitalWrite(resetPin, LOW);
   }
-  else if(textBuff.substring(0,12) == "defragEeprom")
-  {
-    // Primero que nada, guardamos la configuracion actual
-    saveData(source);    
-  }
-  else
+  else if(textBuff != "")
   {
     printData(source, "Comando no reconocido -" + textBuff + "-", true);
   }
   textBuff = "";
+}
+
+String uptimeToString(unsigned long upt)
+{
+  int dias = 0, horas = 0, minutos = 0;
+  String uptime;
+  
+  upt = upt / 1000;   // Lo transformamos a segundos.
+
+  while(upt >= 84600)
+  {
+    dias++;
+    upt -= 84600;
+  }
+
+  uptime += String(dias) + "d ";
+  
+  while(upt >= 3600)
+  {
+    horas++;
+    upt -= 3600;
+  }
+
+  if(horas < 10)
+  {
+    uptime += "0" + String(horas) + ":";
+  }
+  else
+  {
+    uptime += String(horas) + ":";
+  }
+
+  while(upt >= 60)
+  {
+    minutos++;
+    upt -= 60;
+  }
+
+  if(minutos < 10)
+  {
+    uptime += "0" + String(minutos) + ":";
+  }
+  else
+  {
+    uptime += String(minutos) + ":";
+  }
+
+  if(upt < 10)
+  {
+    uptime += "0" + String(upt);
+  }
+  else
+  {
+    uptime += String(upt);
+  }
+  
+  return uptime;
+  
 }
 

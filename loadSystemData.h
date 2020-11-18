@@ -8,24 +8,28 @@ void loadSystemData()
   eeAddress = EEPROM.length() - sizeof(systemData) - 1;
   EEPROM.get(eeAddress, sys);
 
-  Serial.print("Iniciando ethernet shield: ");
-  Ethernet.begin(sys.mac, sys.ip, sys.dns, sys.gateway, sys.subnet);
+  Serial.print("Iniciando ethernet shield. Espera: ");
+
+  // Esperamos 3 segundos antes de iniciar el shield porque no levanta cuando encendemos el arduino.
+  for(int i=1;i<4;i++)
+  {
+    Serial.print(String(i) + ".");
+    delay(1000);
+  }
+
+  Ethernet.begin(sys.mac, sys.ip, sys.dns, sys.gateway, sys.subnet);  
+  Serial.println("hecho.\n");
+  
+  // Iniciamos el servidor de telnet
+  Serial.print("Iniciando servidor: ");
+  server.begin();
   Serial.println("hecho.\n");
 
-  int pos       = 0;
   relayQuantity = 0;
   eeAddress     = 0;
 
   // Se cargan todos los relés guardados en la EEPROM en una lista
   // dinámica. De esta forma, pueden crearse relés sin problemas.
-
-  // Desde el byte 0 hasta el 100 está el "sistema de archivos" que consiste
-  // en dos bytes que guardan un int, este int es la dirección de memoria
-  // donde se guarda la info del rele. Si es igual a 0, 
-  for(int i=0;i<50;i++)
-  {
-    EEPROM.get(eeAddress, pos);
-  }
   
   do
   {

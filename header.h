@@ -1,7 +1,6 @@
 #include <Wire.h>                        // Librería para el protocolo I2C
 #include <RTClib.h>                      // Librería para el reloj de tiempo real
 #include <SPI.h>
-#include <SD.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
 
@@ -15,8 +14,8 @@ void printData(String source, String data, bool rc);
 void closeConnection();
 void setParam(String param, String source);
 void saveData(String source);
-String arrayToString(byte array[], unsigned int len);
 void checkRelays();
+String uptimeToString(unsigned long upt);
 
 // ----------- DEFINICION DE TIPOS DE PLACA ----------- //
 
@@ -98,7 +97,7 @@ typedef struct relayData
 
 typedef struct node {
     struct  relayData relay;
-    byte    memPos;
+    unsigned long uptime;
     bool    changeFlag;
     bool    overrided;
     struct node * next;
@@ -123,7 +122,7 @@ struct  systemData sys;
 int     eeAddress       = 0;
 bool    sysChangeFlag   = false;
 String  dias[]          = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
-String  sysVersion      = "1.5";
+String  sysVersion      = "1.5.1";
 String  estados[]       = { "ON", "OFF" };
 int     resetPin        = 9;
 unsigned long tstamp    = 0;

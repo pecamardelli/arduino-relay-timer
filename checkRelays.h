@@ -20,15 +20,18 @@ void checkRelays()
           if(endmins < actualmins)
           {
             digitalWrite(aux->relay.pin, HIGH);
+            aux->uptime = 0;
           }
           else
           {
             digitalWrite(aux->relay.pin, LOW);
+            aux->uptime = millis();
           }
         }
         else
         {
           digitalWrite(aux->relay.pin, LOW);
+          aux->uptime = millis();
         }
       }
       else
@@ -36,16 +39,19 @@ void checkRelays()
         if(startmins < endmins)
         {
           digitalWrite(aux->relay.pin, HIGH);
+          aux->uptime = 0;
         }
         else
         {          
           if(endmins > actualmins)
           {
             digitalWrite(aux->relay.pin, LOW);
+            aux->uptime = millis();
           }
           else
           {
             digitalWrite(aux->relay.pin, HIGH);
+            aux->uptime = 0;
           }
         }
       }
@@ -53,15 +59,8 @@ void checkRelays()
     else if(!aux->overrided)
     {
       digitalWrite(aux->relay.pin, HIGH);
+      aux->uptime = 0;
     }
-    
     aux = aux->next;
   }
-
-  /*
-  for(int i=0;i<3;i++)
-  {
-    
-  }
-  */
 }

@@ -1,11 +1,9 @@
 void saveData(String source)
 {
-
-  printData(source, "Guardando cambios en EEPROM...", true);
-  
   int q = 0;
-  aux       = first;
-  eeAddress = 0;
+  aux         = first;
+  eeAddress   = 0;
+  bool saved  = false;
 
   while(aux != NULL)
   {
@@ -19,7 +17,10 @@ void saveData(String source)
     aux = aux->next;
   }
 
-  printData(source, String(q) + " reles cambiados.", true);
+  if(q > 0)
+  {
+    printData(source, String(q) + " reles guardados.", true);
+  }
   
   if(sysChangeFlag)
   {
@@ -36,62 +37,11 @@ void saveData(String source)
     EEPROM.put(eeAddress, sys);
     printData(source, "Informacion de sistema guardada.", true);
     sysChangeFlag = false;
+    saved = true;
   }
-  
 
-  /*
-  File f;
-  String fileName;
-
-  if(!SD.exists(sysFolder))
+  if(q == 0 && !saved)
   {
-    SD.mkdir(sysFolder);
+    printData(source, "No hay cambios para guardar.", true);
   }
-  
-  fileName = sysFolder + "hostname.txt";
-  
-  SD.remove(fileName);
-  f = SD.open(fileName, FILE_WRITE);
-  f.print(hostName);
-  f.close();
-
-  for(int i=0;i<4;i++)
-  {
-    fileName = sysFolder + "r" + String(i) + "enab.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayEnabled[i]);
-    f.close();
-
-    fileName = sysFolder + "r" + String(i) + "desc.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayDesc[i]);
-    f.close();
-
-    fileName = sysFolder + "r" + String(i) + "starth.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayStartHour[i]);
-    f.close();
-
-    fileName = sysFolder + "r" + String(i) + "startm.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayStartMin[i]);
-    f.close();
-
-    fileName = sysFolder + "r" + String(i) + "endh.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayEndHour[i]);
-    f.close();
-    
-    fileName = sysFolder + "r" + String(i) + "endm.txt";
-    SD.remove(fileName);
-    f = SD.open(fileName, FILE_WRITE);
-    f.print(relayEndMin[i]);
-    f.close();
-  }  
-  */
 }

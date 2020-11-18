@@ -1,5 +1,18 @@
 /*
- * ARDUINO RELAY TIMER - 25 de septiembre de 2018
+ * ARDUINO RELAY TIMER - 26 de septiembre de 2018
+ * Version 1.5.1
+ * 
+ * Cambios con respecto a la versión 1.5
+ * - Se pueden prender los reles manualmente sin que la función checkRelays() modifique un rele con
+ *   la variable overrided en true.
+ * - Se corrigieron un par de errores de ortografía.
+ * - Se modificó el orden de inicio de la función Server.begin(). Se puso después de Ethernet.begin().
+ * - Se eliminó la función array_to_string() con su respectivo archivo.
+ * - Agregado un contador de uptime de los relés y la entrada correspondiente en relayinfo.
+ * - Reemplazados los comandos hostname e ip por sysinfo. Además muestra el uptime del sistema.
+ * - Se agregó una línea en blanco antes de imprimir la salida de los comandos.
+ * - No se parsea un comando en blanco. Antes al apretar enter tiraba error de comándo no reconocido.
+ * - Se cambió la salida del comando save.
  */
 
 #include "header.h"
@@ -12,7 +25,6 @@
 #include "closeConnection.h"
 #include "setParam.h"
 #include "saveData.h"
-#include "arrayToString.h"
 #include "checkRelays.h"
 
 void setup() {
@@ -32,11 +44,6 @@ void setup() {
 
   Serial.print("Iniciando el reloj RTC: ");
   RTC.begin();                          // Inicia la comunicación con el RTC
-  Serial.println("hecho.\n");
-
-  // Iniciamos el servidor de telnet
-  Serial.print("Iniciando servidor: ");
-  server.begin();
   Serial.println("hecho.\n");
   
   loadSystemData();
@@ -78,7 +85,7 @@ void checkConnectionTimeout()
 {
   if(millis() - timeOfLastActivity > allowedConnectTime) {
     client.println();
-    client.println("Timeout disconnect.");
+    client.println("Desconectado por inactividad.");
     client.stop();
     connectFlag = 0;
   }

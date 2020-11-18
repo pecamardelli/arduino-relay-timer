@@ -15,7 +15,7 @@ void getReceivedText(String source)
     do {
       c = client.read();
       //textBuff[charsReceived] = c;
-      if(c != 0x0d && charsReceived > 0)
+      if(c != 0x0d && charsReceived > 0 && c >= 32 && c <= 126)
       {
         textBuff += (char)c;
       }
@@ -28,6 +28,7 @@ void getReceivedText(String source)
     if(c == 0x0d) {
       //textBuffer[charsReceived - 1] = '\0'; 
       parseReceivedText("telnet");
+      client.flush();
       // after completing command, print a new prompt
       printPrompt();
     }

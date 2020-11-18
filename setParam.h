@@ -181,8 +181,16 @@ void setParam(String param, String source)
     {
       if(!aux->relay.deleted)
       {
-        digitalWrite(aux->relay.pin, LOW);
-        aux->overrided  = true;
+        if(digitalRead(aux->relay.pin) == HIGH)
+        {
+          digitalWrite(aux->relay.pin, LOW);
+          aux->overrided  = true;
+          aux->uptime = millis();
+        }
+        else
+        {
+          printData(source, "El rele " + String(num) + " esta encendido.", true);
+        }
       }
       else
       {
@@ -193,8 +201,16 @@ void setParam(String param, String source)
     {
       if(!aux->relay.deleted)
       {
-        digitalWrite(aux->relay.pin, HIGH);
-        aux->overrided  = true;
+        if(digitalRead(aux->relay.pin) == LOW)
+        {
+          digitalWrite(aux->relay.pin, HIGH);
+          aux->overrided  = true;
+          aux->uptime = 0;
+        }
+        else
+        {
+          printData(source, "El rele " + String(num) + " esta apagado.", true);
+        }
       }
       else
       {
