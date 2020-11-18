@@ -1,7 +1,6 @@
-void printPrompt()
-{
+void printPrompt() {
   timeOfLastActivity = millis();
   client.flush();
-  charsReceived = 0; //count of characters received
+  charsReceived = 0; // Count of characters received
   client.print("\n>");
 }

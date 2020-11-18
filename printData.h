@@ -1,25 +1,17 @@
-void printData(String source, String data, bool rc)
-{
-  if(source == "serial")
-  {
-    if(rc)
-    {
+void printData(String source, String data, bool rc) {
+  if(source == "serial") {
+    if(rc) {
       Serial.println(data);
     }
-    else
-    {
+    else {
       Serial.print(data);
     }
-    
   }
-  else if(source == "telnet")
-  {
-    if(rc)
-    {
+  else if(source == "telnet") {
+    if(rc) {
       client.println(data);
     }
-    else
-    {
+    else  {
       client.print(data);
     }
   }

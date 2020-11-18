@@ -1,5 +1,4 @@
-void getReceivedText(String source)
-{
+void getReceivedText(String source) {
   char c;
   int charsWaiting  = 0;
   const int textBuffSize          = 64;
@@ -9,43 +8,38 @@ void getReceivedText(String source)
   // copy waiting characters into textBuff
   //until textBuff full, CR received, or no more characters
 
-  if(source == "telnet")
-  {
+  if(source == "telnet") {
     charsWaiting = client.available();
     do {
       c = client.read();
       //textBuff[charsReceived] = c;
-      if(c != 0x0d && charsReceived > 0 && c >= 32 && c <= 126)
-      {
+      if(c != 0x0d && charsReceived > 0) {
         textBuff += (char)c;
       }
       charsReceived++;
       charsWaiting--;     
     }
-    while(charsReceived <= textBuffSize && c != 0x0d && charsWaiting > 0);
+    while (charsReceived <= textBuffSize && c != 0x0d && charsWaiting > 0);
     
     //if CR found go look at received text and execute command
     if(c == 0x0d) {
       //textBuffer[charsReceived - 1] = '\0'; 
       parseReceivedText("telnet");
-      client.flush();
       // after completing command, print a new prompt
       printPrompt();
     }
   
     // if textBuff full without reaching a CR, print an error message
     if(charsReceived >= textBuffSize) {
-      client.println("El comando debe tener como maximo 64 caracteres.");
+      client.println("Command must have a maximum of 64 characters.");
       printPrompt();
     }
       
     // if textBuff not full and no CR, do nothing else;
     // go back to loop until more characters are received
   }
-  else if(source == "serial")
-  {
-    while(Serial.available())
-    {
+  else if(source == "serial") {
+    while(Serial.available()) {
       //textBuffer[charsReceived] = (char)Serial.read();
       c = (char)Serial.read();
       textBuff += c;

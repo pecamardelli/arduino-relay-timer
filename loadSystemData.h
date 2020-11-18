@@ -1,59 +1,42 @@
-void loadSystemData()
-{
-
-  // CARGA DE LOS DATOS DEL SISTEMA
-  // Se almacenan a lo último de la EEPROM.
-  // Los relés se guardan al principio.
+void loadSystemData() {
+  // LOAD SYSTEM CONFIGS
+  // They're stored at the end of the EEPROM.
+  // Relay data is stored at the beginning.
  
   eeAddress = EEPROM.length() - sizeof(systemData) - 1;
   EEPROM.get(eeAddress, sys);
 
-  Serial.print("Iniciando ethernet shield. Espera: ");
-
-  // Esperamos 3 segundos antes de iniciar el shield porque no levanta cuando encendemos el arduino.
-  for(int i=1;i<4;i++)
-  {
-    Serial.print(String(i) + ".");
-    delay(1000);
-  }
-
-  Ethernet.begin(sys.mac, sys.ip, sys.dns, sys.gateway, sys.subnet);  
-  Serial.println("hecho.\n");
-  
-  // Iniciamos el servidor de telnet
-  Serial.print("Iniciando servidor: ");
-  server.begin();
+  Serial.print("Iniciando ethernet shield: ");
+  Ethernet.begin(sys.mac, sys.ip, sys.dns, sys.gateway, sys.subnet);
   Serial.println("hecho.\n");
 
+  int pos       = 0;
   relayQuantity = 0;
   eeAddress     = 0;
 
-  // Se cargan todos los relés guardados en la EEPROM en una lista
-  // dinámica. De esta forma, pueden crearse relés sin problemas.
+  // All relays are loaded into a dynamic list. This way, more relays can be added later.
+
+  // From byte 0 to 100 is stored the "file system". Every two bytes is an integer
+  // that represents a memory address where the relay data is stored on the EEPROM.
+  for(int i=0;i<50;i++) {
+    EEPROM.get(eeAddress, pos);
+  }
   
-  do
-  {
+  do {
     aux = (node_t *)malloc(sizeof(node_t));
     
-    if (aux == NULL)
-    {
-        Serial.println("Error al asignar memoria. Se cargaron " + String(relayQuantity) + " reles.");
+    if (aux == NULL) {
+        Serial.println("ERROR: Could not allocate memory. " + String(relayQuantity) + " relay(s) loaded.");
         break;
-    }
-    else
-    {
+    } else {
       EEPROM.get(eeAddress, aux->relay);
   
-      if(aux->relay.type == 200)
-      {
-        if(first == NULL)
-        {
+      if(aux->relay.type == 200) {
+        if(first == NULL) {
           first       = aux;
           first->next = NULL;
           last        = first;
-        }
-        else
-        {
+        } else {
           last->next  = aux;
           last        = aux;
           last->next  = NULL;
@@ -66,10 +49,8 @@ void loadSystemData()
         
         eeAddress += sizeof(relayData);
         relayQuantity++;
-      }
-      else
-      {
-        Serial.println("Lista la carga de datos. " + String(relayQuantity) + " reles cargados.");
+      } else {
+        Serial.println("All relays loaded. Total: " + String(relayQuantity));
         break;
       }
     }

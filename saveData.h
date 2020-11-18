@@ -1,14 +1,12 @@
-void saveData(String source)
-{
+void saveData(String source) {
+  printData(source, "Saving changes to EEPROM...", true);
+  
   int q = 0;
-  aux         = first;
-  eeAddress   = 0;
-  bool saved  = false;
+  aux       = first;
+  eeAddress = 0;
 
-  while(aux != NULL)
-  {
-    if(aux->changeFlag)
-    {
+  while(aux != NULL) {
+    if(aux->changeFlag) {
       EEPROM.put(eeAddress, aux->relay);
       aux->changeFlag = false;
       q++;
@@ -17,13 +15,9 @@ void saveData(String source)
     aux = aux->next;
   }
 
-  if(q > 0)
-  {
-    printData(source, String(q) + " reles guardados.", true);
-  }
+  printData(source, String(q) + " relays updated.", true);
   
-  if(sysChangeFlag)
-  {
+  if(sysChangeFlag) {
     eeAddress = EEPROM.length() - sizeof(systemData) - 1;
     /*
      * byte mac[] =     { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -35,13 +29,7 @@ void saveData(String source)
     sys.mac[5] = 0xED;
     */
     EEPROM.put(eeAddress, sys);
-    printData(source, "Informacion de sistema guardada.", true);
+    printData(source, "System data saved.", true);
     sysChangeFlag = false;
-    saved = true;
-  }
-
-  if(q == 0 && !saved)
-  {
-    printData(source, "No hay cambios para guardar.", true);
   }
 }
