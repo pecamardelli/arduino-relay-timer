@@ -39,7 +39,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
   if(server.available() && !connectFlag) {
     connectFlag = 1;
@@ -55,7 +54,10 @@ void loop() {
   }
 
   // Check to see if text received
-  if (client.connected() && client.available()) getReceivedText("telnet");
+  if (client.connected() && client.available()) {
+    getReceivedText("telnet");
+    printPrompt();
+  }
 
   // Check to see if connection has timed out
   if(connectFlag) checkConnectionTimeout();

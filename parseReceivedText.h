@@ -1,48 +1,62 @@
-void parseReceivedText(String source) {
-  if(textBuff.substring(0,4) == "help") {
+void parseReceivedText(String source, char *command) {
+  // Slicing arguments
+  char *args[MAX_COMMAND_ARGS] = {""};
+  char *token = strtok(command, " ");
+  byte index = 0;
+
+  while(token != NULL) {
+    args[index] = token;
+    index++;
+    token = strtok(NULL, " ");
+  }
+
+  printData(source, "", true); 
+  
+  if(strncmp(args[0], "help", 4) == 0) {
     printHelp(source);
   }
-  else if(textBuff.substring(0,4) == "time") {
+  else if(strncmp(args[0], "time", 4) == 0) {
     printData(source, getDate(), true);
   }
-  else if(textBuff.substring(0,4) == "exit" ||
-          textBuff.substring(0,4) == "quit" &&
+  else if(strncmp(args[0], "exit", 4) == 0 ||
+          strncmp(args[0], "quit", 4) == 0 &&
           source == "telnet") {
     closeConnection();
   }
-  else if(textBuff.substring(0,3) == "set") {
-    setParam(textBuff.substring(4), source);
+  else if(strncmp(args[0], "set", 3) == 0) {
+    //setParam(textBuff.substring(4), source);
   }
-  else if(textBuff.substring(0,9) == "relayinfo") {
+  else if(strncmp(args[0], "relayinfo", 9) == 0) {
     getRelayInfo(source);
   }
-  else if(textBuff.substring(0,4) == "save") {
+  else if(strncmp(args[0], "save", 4) == 0) {
     saveData(source);
   }
-  else if(textBuff.substring(0,8) == "hostname") {
+  else if(strncmp(args[0], "hostname", 8) == 0) {
     printData(source, sys.hostName, true);
   }
-  else if(textBuff.substring(0,7) == "version") {
+  else if(strncmp(args[0], "version", 7) == 0) {
     printData(source, "ARDUINO RELAY TIMER Version " + sysVersion, true);
   }
-  else if(textBuff.substring(0,2) == "ip") {
+  else if(strncmp(args[0], "ip", 2) == 0) {
     printIpAddress(source);
   }
-  else if(textBuff.substring(0,8) == "addrelay") {
+  else if(strncmp(args[0], "addrelay", 8) == 0) {
     addRelay(source);
   }
-  else if(textBuff.substring(0,8) == "delrelay") {
+  else if(strncmp(args[0], "delrelay", 8) == 0) {
     deleteRelay(source);
   }
-  else if(textBuff.substring(0,6) == "reboot") {
+  else if(strncmp(args[0], "reboot", 6) == 0) {
     digitalWrite(resetPin, LOW);
   }
-  else if(textBuff.substring(0,12) == "defragEeprom") {
+  else if(strncmp(args[0], "defragEeprom", 12) == 0) {
     // Currently unimplemented...
-    saveData(source);    
+    printData(source, F("Feature not implemented"), true);
   }
   else {
-    printData(source, "Bad command -" + textBuff + "-", true);
+    printData(source, F("Bad command \""), false);
+    printData(source, args[0], false);
+    printData(source, F("\""), true);
   }
-  textBuff = "";
 }

@@ -1,6 +1,7 @@
 void addRelay(String source) {
   // Obtain only two digits and ignore the rest of the string.
-  int pin = textBuff.substring(9,11).toInt();
+  //int pin = textBuff.substring(9,11).toInt();
+  int pin = 45;
   bool match = false;
 
   // Check if pin number is out of range

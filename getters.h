@@ -11,54 +11,56 @@ String getDate() {
 
 void getReceivedText(String source) {
   char c;
-  int charsWaiting  = 0;
-  const int textBuffSize          = 64;
-  //char textBuffer[textBuffSize] = "";
-  //charsReceived = 0;
-
-  // copy waiting characters into textBuff
-  //until textBuff full, CR received, or no more characters
-
-  if(source == "telnet") {
-    charsWaiting = client.available();
-    do {
-      c = client.read();
-      //textBuff[charsReceived] = c;
-      if(c != 0x0d && charsReceived > 0) {
-        textBuff += (char)c;
-      }
-      charsReceived++;
-      charsWaiting--;     
-    }
-    while (charsReceived <= textBuffSize && c != 0x0d && charsWaiting > 0);
-    
-    //if CR found go look at received text and execute command
-    if(c == 0x0d) {
-      //textBuffer[charsReceived - 1] = '\0'; 
-      parseReceivedText("telnet");
-      // after completing command, print a new prompt
-      printPrompt();
-    }
+  byte charsWaiting  = 0;
+  byte charsReceived = 0;
+  char *command;
   
-    // if textBuff full without reaching a CR, print an error message
-    if(charsReceived >= textBuffSize) {
-      client.println("Command must have a maximum of 64 characters.");
-      printPrompt();
+  if(source == "telnet") {
+    charsWaiting = client.available();    
+
+    if (!charsWaiting) return;
+
+    if (charsWaiting > MAX_COMMAND_LENGTH) {
+      client.print(F("Command must have a maximum of "));
+      client.print(String(MAX_COMMAND_LENGTH));
+      client.println(F(" characters."));
+      return;
     }
-      
-    // if textBuff not full and no CR, do nothing else;
-    // go back to loop until more characters are received
+
+    // Looks like we have a command to parse. Let's do it.
+    command = (char*) malloc (charsWaiting*sizeof(char));
+    
+    while(charsWaiting > 0) {
+      c = client.read();
+       
+      if (isalpha(c) or isdigit(c) or c == 0x20 or c == 0x00) {
+        //textBuff += (char)c;
+        command[charsReceived] = (char)c;
+        charsReceived++;
+      }
+      else if (c == 0x0d) {   // Carriage return. Parse command.
+        // Jump to parseReceivedText
+        break;
+      }
+      charsWaiting--;
+    }
   }
   else if(source == "serial") {
+    command = (char*) malloc (MAX_COMMAND_LENGTH*sizeof(char));
     while(Serial.available()) {
-      //textBuffer[charsReceived] = (char)Serial.read();
       c = (char)Serial.read();
-      textBuff += c;
+      
+      if (isalpha(c) or isdigit(c) or c == 0x20) {
+        command[charsReceived] = (char)c;
+        charsReceived++;
+        if (charsReceived >= 64) break;
+      }
       delay(5);
-      charsReceived++;
     }
-    parseReceivedText(source);
-  }  
+  }
+
+  if (charsReceived) parseReceivedText(source, command);
+  if (command) free(command);
 }
 
 void getRelayInfo(String source) {

@@ -39,9 +39,8 @@ void printData(String source, String data, bool rc) {
 // Print the prompt
 void printPrompt() {
   timeOfLastActivity = millis();
-  //client.flush();
-  charsReceived = 0; // Count of characters received
-  client.println("");
+  client.flush();
+  client.println();
   client.print(">");
 }
 

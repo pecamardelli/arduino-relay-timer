@@ -5,12 +5,17 @@
 #include <Ethernet.h>
 #include <EEPROM.h>
 
+// ----------- MISC ------------- //
+
+#define MAX_COMMAND_LENGTH  64
+#define MAX_COMMAND_ARGS    10
+
 // ----------- FUNCTION DECLARATIONS ----------- //
 
 void loadSystemData();
 String getDate();
 void getReceivedText(String source);
-void parseReceivedText(String source);
+void parseReceivedText(String source, char *command);
 void printPrompt();
 void printData(String source, String data, bool rc);
 void printHelp(String source);
@@ -135,10 +140,6 @@ int     unusablePins[]  = { 9, 10, 11, 12, 13 };
 
 // ----------- TELNET SERVER ----------- //
 
-String textBuff;
-int charsReceived = 0;
-int textBuffSize  = 64;
-
 // we'll use a flag separate from client.connected
 // so we can recognize when a new connection has been created
 boolean connectFlag = 0;                    
@@ -151,6 +152,6 @@ unsigned long allowedConnectTime = 300000;
 
 EthernetServer server(23); // Telnet listens on port 23
 EthernetClient client = 0; // Client needs to have global scope so it can be called
-       // from functions outside of loop, but we don't know
-       // what client is yet, so creating an empty object
+                           // from functions outside of loop, but we don't know
+                           // what client is yet, so creating an empty object
 /* -------------------------------------------------------------- */

@@ -1,5 +1,5 @@
 void saveData(String source) {
-  printData(source, "Saving changes to EEPROM...", true);
+  printData(source, F("Saving changes to EEPROM..."), true);
   
   int q = 0;
   aux       = first;
@@ -29,7 +29,7 @@ void saveData(String source) {
     sys.mac[5] = 0xED;
     */
     EEPROM.put(eeAddress, sys);
-    printData(source, "System data saved.", true);
+    printData(source, F("System data saved."), true);
     sysChangeFlag = false;
   }
 }

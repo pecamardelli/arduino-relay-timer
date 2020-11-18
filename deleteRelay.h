@@ -1,5 +1,6 @@
 void deleteRelay(String source) {
-  int pin = textBuff.substring(9,11).toInt();
+  //int pin = textBuff.substring(9,11).toInt();
+  int pin = 45;
 
   // Check if pin number is out of range
   if(pin < 0 || pin > 53) {
