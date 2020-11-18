@@ -1,23 +1,24 @@
 #include <Wire.h>                        // Librería para el protocolo I2C
-#include "RTClib.h"                      // Librería para el reloj de tiempo real
+#include <RTClib.h>                      // Librería para el reloj de tiempo real
 #include <SPI.h>
 #include <SD.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
 
+// ----------- DEFINICION DE FUNCIONES ----------- //
 void loadSystemData();
 String getDate();
-void getReceivedText();
+void getReceivedText(String source);
 void parseReceivedText(String source);
 void printPrompt();
 void printData(String source, String data, bool rc);
 void closeConnection();
-void printDirectory(File dir, int numTabs, String source);
-void printFile(String file, String source);
-void deleteFile(String file, String source);
 void setParam(String param, String source);
-void saveData();
+void saveData(String source);
 String arrayToString(byte array[], unsigned int len);
+void checkRelays();
+
+// ----------- DEFINICION DE TIPOS DE PLACA ----------- //
 
 #if   defined(ARDUINO_AVR_ADK)       
     #define BOARD "Mega Adk"
@@ -73,47 +74,76 @@ String arrayToString(byte array[], unsigned int len);
    #error "Unknown board"
 #endif
 
+// ----------- DEFINICION DE VARIABLES ----------- //
+
 RTC_DS1307 RTC;
 
-/* ---------------- VARIABLES DE LOS RELÉS ---------------------- */
+// ----------- VARIABLES DE LOS RELÉS ----------- //
 
-String  hostName          = "ARDUINO";
-int     relayPin[]        = { 22, 23, 24, 25 };
-int     relayEnabled[]    = { 0, 0, 0, 0 };
-String  relayDesc[]       = { "Relay 0", "Relay 1", "Relay 2", "Relay 3" };
-int     relayStartHour[]  = { 0, 0, 0, 0 };
-int     relayStartMin[]   = { 0, 0, 0, 0 };
-int     relayEndHour[]    = { 0, 0, 0, 0 };
-int     relayEndMin[]     = { 0, 0, 0, 0 };
-bool    overrided[]       = { false, false, false, false };
-String  estados[]         = { "encendido", "apagado" };
+int   relayQuantity     = 0;
+int   relayMaxQuantity  = 50;   // No permitir más de 50 relés... Por cantidad de EEPROM y pines.
 
-/* -------------------------------------------------------------- */
+typedef struct relayData
+{
+  byte  type;
+  byte  pin;
+  bool  enabled;
+  char  desc[32];
+  byte  startHour;
+  byte  startMin;
+  byte  endHour;
+  byte  endMin;
+  bool  deleted;
+};
 
-/* ------------------- VARIABLES GLOBALES ----------------------- */
+typedef struct node {
+    struct  relayData relay;
+    byte    memPos;
+    bool    changeFlag;
+    bool    overrided;
+    struct node * next;
+} node_t;
 
-String dias[]       = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
-String sysFolder    = "/system/";
-String sysVersion   = "1.0.5";
+node_t *first = NULL, *last = NULL, *aux = NULL;
 
-/* -------------------------------------------------------------- */
+// ----------- VARIABLES DE SISTEMA ----------- //
 
-/* ------------------ PARÁMETROS ETHERNET ----------------------- */
+typedef struct systemData
+{
+  char   hostName[32];
+  byte   mac[6];
+  byte   ip[4];
+  byte   subnet[4];
+  byte   gateway[4];
+  byte   dns[4];
+};
 
-byte mac[] =     { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress   ip(192, 168, 40, 104);
-IPAddress   gateway(192, 168, 40, 1);
-IPAddress   subnet(255, 255, 255, 0);
-IPAddress   dns(179,42,171,21);
+struct  systemData sys;
+
+int     eeAddress       = 0;
+bool    sysChangeFlag   = false;
+String  dias[]          = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
+String  sysVersion      = "1.5";
+String  estados[]       = { "ON", "OFF" };
+int     resetPin        = 9;
+unsigned long tstamp    = 0;
+int     unusablePins[]  = { 9, 10, 11, 12, 13 };
+
+// ----------- VARIABLES DEL SERVIDOR TELNET ----------- //
 
 String textBuff;
 int charsReceived = 0;
 int textBuffSize  = 64;
 
-boolean connectFlag = 0; //we'll use a flag separate from client.connected
-         //so we can recognize when a new connection has been created
-unsigned long timeOfLastActivity; //time in milliseconds of last activity
-unsigned long allowedConnectTime = 300000; //five minutes
+// we'll use a flag separate from client.connected
+// so we can recognize when a new connection has been created
+boolean connectFlag = 0;                    
+
+//time in milliseconds of last activity
+unsigned long timeOfLastActivity;
+
+//five minutes
+unsigned long allowedConnectTime = 300000;
 
 EthernetServer server(23); // Telnet listens on port 23
 EthernetClient client = 0; // Client needs to have global scope so it can be called

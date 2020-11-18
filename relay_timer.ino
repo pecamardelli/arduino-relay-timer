@@ -1,3 +1,7 @@
+/*
+ * ARDUINO RELAY TIMER - 25 de septiembre de 2018
+ */
+
 #include "header.h"
 #include "loadSystemData.h"
 #include "getDate.h"
@@ -6,15 +10,19 @@
 #include "printPrompt.h"
 #include "printData.h"
 #include "closeConnection.h"
-#include "printDirectory.h"
-#include "printFile.h"
-#include "deleteFile.h"
 #include "setParam.h"
 #include "saveData.h"
 #include "arrayToString.h"
+#include "checkRelays.h"
 
 void setup() {
-  // put your setup code here, to run once:
+  
+  // Es necesario conectar una resistencia de 1k desde el pin elegido
+  // hasta el pin RESET, de lo contrario la placa entra en un loop de
+  // reinicios interminable. Esto pasa porque al arrancar, todos los
+  // pines se ponen como OUTPUT y LOW por un momento.
+  pinMode(resetPin, OUTPUT);
+  digitalWrite(resetPin, HIGH);
   
   Serial.begin(9600);
 
@@ -26,23 +34,10 @@ void setup() {
   RTC.begin();                          // Inicia la comunicación con el RTC
   Serial.println("hecho.\n");
 
-  Serial.print("Iniciando ethernet shield: ");
-  Ethernet.begin(mac, ip, dns, gateway, subnet);
-  Serial.println("hecho.\n");
-
+  // Iniciamos el servidor de telnet
   Serial.print("Iniciando servidor: ");
   server.begin();
   Serial.println("hecho.\n");
-
-  Serial.print("Iniciando tarjeta SD: ");
-
-  if (!SD.begin(4)) {
-    Serial.println("ERROR!\n");
-  }
-  else
-  {
-    Serial.println("hecho.\n");
-  }
   
   loadSystemData();
 }
@@ -54,9 +49,10 @@ void loop() {
   {
     connectFlag = 1;
     client = server.available();
+    client.flush();
     client.println("ARDUINO RELAY TIMER");
     client.print(BOARD);
-    client.println(" - " + hostName);
+    client.println(" - " + String(sys.hostName));
     client.println("Version " + sysVersion);
     client.println("'help' para mostrar comandos");
     client.flush();
@@ -64,29 +60,18 @@ void loop() {
   }
 
   // check to see if text received
-  if (client.connected() && client.available()) getReceivedText();
+  if (client.connected() && client.available()) getReceivedText("telnet");
 
   // check to see if connection has timed out
   if(connectFlag) checkConnectionTimeout();
 
-  int rcv = 0;
-  String cad;
-
-  while(Serial.available())
+  if(Serial.available()) getReceivedText("serial");
+    
+  if(millis() - tstamp >= 5000)
   {
-    cad += (char)Serial.read();
-    rcv = 1;
-    delay(5);
+    checkRelays();
+    tstamp = millis();
   }
-
-  if(rcv == 1)
-  {
-    textBuff += " ";    // Se le agrega un caracter al principio porque el telnet lo hace... Así se usa la misma funcion para parsear los comandos
-    textBuff += cad;
-    parseReceivedText("serial");
-  }
-
-  checkRelays();
 }
 
 void checkConnectionTimeout()
@@ -98,103 +83,3 @@ void checkConnectionTimeout()
     connectFlag = 0;
   }
 }
-
-void checkRelays()
-{
-  DateTime now = RTC.now();
-  int startmins, endmins, actualmins;
-  
-  for(int i=0;i<3;i++)
-  {
-    if(relayEnabled[i] && !overrided[i])
-    {
-      startmins   = relayStartHour[i] * 60 + relayStartMin[i];
-      endmins     = relayEndHour[i] * 60 + relayEndMin[i];
-      actualmins  = now.hour() * 60 + now.minute();
-
-      if(startmins <= actualmins)
-      {
-        if(endmins > startmins)
-        {
-          if(endmins < actualmins)
-          {
-            digitalWrite(relayPin[i], HIGH);
-          }
-          else
-          {
-            digitalWrite(relayPin[i], LOW);
-          }
-        }
-        else
-        {
-          digitalWrite(relayPin[i], LOW);
-        }
-      }
-      else
-      {
-        if(startmins < endmins)
-        {
-          digitalWrite(relayPin[i], HIGH);
-        }
-        else
-        {          
-          if(endmins > actualmins)
-          {
-            digitalWrite(relayPin[i], LOW);
-          }
-          else
-          {
-            digitalWrite(relayPin[i], HIGH);
-          }
-        }
-      }
-    }
-    else
-    {
-      digitalWrite(relayPin[i], HIGH);
-    }
-  }
-}
-/*
-void logger(String cat, String source, String data)
-{
-  String s;
-
-  if(source == "serial")
-  {
-    s = "[SERIAL] ";
-  }
-  else if(source == "telnet")
-  {
-    s = "[TELNET](" + String(client.remoteIP()) + ") ";
-  }
-  else
-  {
-    s = "";
-  }
-  
-  String logfile = sysFolder + "syslog.txt";
-  
-  DateTime now = RTC.now();
-
-  File entry = SD.open(logfile, FILE_WRITE);
-
-  if(entry)
-  {
-    entry.println(String(now.day()) + " de " +
-                  meses[now.month()] + " de " +
-                  String(now.year()) + " " + 
-                  String(now.hour()) + ":" + 
-                  String(now.minute()) + ":" + 
-                  String(now.second()) + " " + 
-                  s + data);
-    entry.close();
-  }
-  else
-  {
-    Serial.println("No se pudo abrir " + logfile + ".");
-  }
-}
-*/
-
-

@@ -1,193 +1,258 @@
 void parseReceivedText(String source)
 {
-  //client.println(textBuff.substring(1,5));
-  File root;
-  
-  if(textBuff.substring(1,5) == "help" || textBuff.substring(1,1) == "?")
+  if(textBuff.substring(0,4) == "help")
   {
     printData(source, "time\t\t\t-->\tDevuelve la hora actual.", true);
-    printData(source, "relay(0-3) (on-off)\t-->\tEnciende o apaga el rele indicado.", true);
+    printData(source, "relay(0-50) (on-off)\t-->\tEnciende o apaga el rele indicado.", true);
     printData(source, "relays (on-off)\t\t-->\tEnciende o apaga todos los reles.", true);
     printData(source, "relayinfo\t\t-->\tMuestra el estado y la configuracion de los reles.", true);
-    printData(source, "ls\t\t\t-->\tLista los archivos de la SD.", true);
-    printData(source, "cat (archivo)\t\t-->\tImprime el archivo especificado.", true);
-    printData(source, "del (archivo)\t\t-->\tElimina el archivo especificado.", true);
+    printData(source, "addrelay (0-50)\t\t-->\tAgrega un nuevo rele en el pin indicado.", true);
+    printData(source, "delrelay (0-50)\t\t-->\tElimina el rele en el pin indicado.", true);
     printData(source, "set (parametro)\t\t-->\tCambiar un parametro del sistema. 'set help' para ver opciones.", true);
     printData(source, "hostname\t\t-->\tMuestra el nombre del sistema.", true);
     printData(source, "ip\t\t\t-->\tMuestra la configuracion de IP actual.", true);
     printData(source, "version\t\t\t-->\tMuestra la version actual del sistema.", true);
     printData(source, "save\t\t\t-->\tGuarda los cambios.", true);
+    printData(source, "reboot\t\t\t-->\tReinicia el sistema.", true);
     printData(source, "exit\t\t\t-->\tCerrar conexion (solo telnet).", true);
     printData(source, "quit\t\t\t-->\tCerrar conexion (solo telnet).", true);
   }
-  else if(textBuff.substring(1,5) == "time")
+  else if(textBuff.substring(0,4) == "time")
   {
     printData(source, getDate(), true);
   }
-  else if(textBuff.substring(1,10) == "relay0 on")
-  {
-    digitalWrite(relayPin[0], LOW);
-    overrided[0] = true;
-  }
-  else if(textBuff.substring(1,11) == "relay0 off")
-  {
-    digitalWrite(relayPin[0], HIGH);
-    overrided[0] = true;
-  }
-  else if(textBuff.substring(1,10) == "relay1 on")
-  {
-    digitalWrite(relayPin[1], LOW);
-    overrided[1] = true;
-  }
-  else if(textBuff.substring(1,11) == "relay1 off")
-  {
-    digitalWrite(relayPin[1], HIGH);
-    overrided[1] = true;
-  }
-  else if(textBuff.substring(1,10) == "relay2 on")
-  {
-    digitalWrite(relayPin[2], LOW);
-    overrided[2] = true;
-  }
-  else if(textBuff.substring(1,11) == "relay2 off")
-  {
-    digitalWrite(relayPin[2], HIGH);
-    overrided[2] = true;
-  }
-  else if(textBuff.substring(1,10) == "relay3 on")
-  {
-    digitalWrite(relayPin[3], LOW);
-    overrided[3] = true;
-  }
-  else if(textBuff.substring(1,11) == "relay3 off")
-  {
-    digitalWrite(relayPin[3], HIGH);
-    overrided[3] = true;
-  }
-  else if(textBuff.substring(1,11) == "relays off")
-  {
-    digitalWrite(relayPin[0], HIGH);
-    overrided[0] = true;
-    digitalWrite(relayPin[1], HIGH);
-    overrided[1] = true;
-    digitalWrite(relayPin[2], HIGH);
-    overrided[2] = true;
-    digitalWrite(relayPin[3], HIGH);
-    overrided[3] = true;
-  }
-  else if(textBuff.substring(1,10) == "relays on")
-  {
-    digitalWrite(relayPin[0], LOW);
-    overrided[0] = true;
-    digitalWrite(relayPin[1], LOW);
-    overrided[1] = true;
-    digitalWrite(relayPin[2], LOW);
-    overrided[2] = true;
-    digitalWrite(relayPin[3], LOW);
-    overrided[3] = true;
-  }
-  else if(textBuff.substring(1,5) == "exit" || textBuff.substring(1,5) == "quit" && source == "telnet")
+  else if(textBuff.substring(0,4) == "exit" || textBuff.substring(0,5) == "quit" && source == "telnet")
   {
     closeConnection();
   }
-  else if(textBuff.substring(1,3) == "ls")
+  else if(textBuff.substring(0,3) == "set")
   {
-    String dir = "/";
+    setParam(textBuff.substring(4), source);
+  }
+  else if(textBuff.substring(0,9) == "relayinfo")
+  {
+    printData(source, "PIN\tENABLED\tDESCRIPTION\t\tSTARTH\tSTARTM\tENDH\tENDM\tSTATUS", true);
     
-    if(textBuff.length() > 4)
+    aux = first;
+    String var = "";
+  
+    while(aux != NULL)
     {
-      dir = textBuff.substring(4,textBuff.length() - 1) + "/";
-    }
-    //printData(source, "-" + dir + "-", true);
-    root = SD.open(dir);
-    
-    if(root)
-    {
-      printData(source, "Contenido de " + dir, true);
-      printDirectory(root, 0, source);
-      root.close();
-    }
-    else
-    {
-      printData(source, "No existe el directorio -" + dir + "-", true);
-    }
-  }
-  else if(textBuff.substring(1,4) == "cat")
-  {
-    String f = textBuff.substring(5,textBuff.length() - 1);
-    //printData(source, f, true);
-    printFile(f, source);
-  }
-  else if(textBuff.substring(1,4) == "del")
-  {
-    String f = textBuff.substring(5,textBuff.length() - 1);
-    deleteFile(f, source);
-  }
-  else if(textBuff.substring(1,4) == "set")
-  {
-    String f = textBuff.substring(5,textBuff.length() - 1);
-    //printData(source, f, true);
-    setParam(f, source);
-  }
-  else if(textBuff.substring(1,10) == "relayinfo")
-  {
-    printData(source, "NRO\tENABLED\tDESC\t\tSTARTH\tSTARTM\tENDH\tENDM", true);
-    for(int i=0;i<4;i++)
-    {
-      printData(source, String(i) + "\t", false);
-      printData(source, String(relayEnabled[i]) + "\t", false);
+      if(!aux->relay.deleted)
+      {
+        printData(source, String(aux->relay.pin) + "\t", false);
+        printData(source, String(aux->relay.enabled) + "\t", false);
+        printData(source, String(aux->relay.desc), false);
+        
+        var = String(aux->relay.desc);
+  
+        if(var.length() < 8)
+        {
+          printData(source, "\t\t\t", false);
+        }
+        else if(var.length() < 16)
+        {
+          printData(source, "\t\t", false);
+        }
+        else
+        {
+          printData(source, "\t", false);
+        }
+        
+        printData(source, String(aux->relay.startHour) + "\t", false);
+        printData(source, String(aux->relay.startMin) + "\t", false);
+        printData(source, String(aux->relay.endHour) + "\t", false);
+        printData(source, String(aux->relay.endMin) + "\t", false);
+        printData(source, estados[digitalRead(aux->relay.pin)] + "\t", false);
 
-      String tabs;
-      
-      if(relayDesc[i].length() <= 8)
-      {
-        tabs = "\t\t";
+        if(aux->changeFlag)
+        {
+          printData(source, "*", true);
+        }
+        else
+        {
+          printData(source, "", true);
+        }
+        //printData(source, String(aux->relay.deleted) + "\t", true);
       }
-      else if(relayDesc[i].length() <= 16)
-      {
-        tabs = "\t";
-      }
-      
-      printData(source, relayDesc[i] + tabs, false);
-      printData(source, String(relayStartHour[i]) + "\t", false);
-      printData(source, String(relayStartMin[i]) + "\t", false);
-      printData(source, String(relayEndHour[i]) + "\t", false);
-      printData(source, String(relayEndMin[i]) + "\t", true);
-    }
-    
+        
+      aux = aux->next;
+    }    
   }
-  else if(textBuff.substring(1,5) == "save")
+  else if(textBuff.substring(0,4) == "save")
   {
-    saveData();
+    saveData(source);
   }
-  else if(textBuff.substring(1,9) == "hostname")
+  else if(textBuff.substring(0,8) == "hostname")
   {
-    printData(source, hostName, true);
+    printData(source, sys.hostName, true);
   }
-  else if(textBuff.substring(1,8) == "version")
+  else if(textBuff.substring(0,7) == "version")
   {
     printData(source, "ARDUINO RELAY TIMER Version " + sysVersion, true);
   }
-  else if(textBuff.substring(1,3) == "ip")
+  else if(textBuff.substring(0,2) == "ip")
   {
-    //Serial.write((long)mac);
-   printData(source, "MAC address:\t" + arrayToString(mac, 6), true);
-   char ipadd[16] = "";
-   sprintf(ipadd, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-   printData(source, "IP address:\t" + String(ipadd), true);
+    printData(source, "\nMAC:\t\t" +
+                  String(sys.mac[0], HEX) + ":" +
+                  String(sys.mac[1], HEX) + ":" +
+                  String(sys.mac[2], HEX) + ":" +
+                  String(sys.mac[3], HEX) + ":" +
+                  String(sys.mac[4], HEX) + ":" +
+                  String(sys.mac[5], HEX), true);
+                  
+    char ipadd[16] = "";
+    sprintf(ipadd, "%d.%d.%d.%d", sys.ip[0], sys.ip[1], sys.ip[2], sys.ip[3]);
+    printData(source, "IP address:\t" + String(ipadd), true);
+    
+    sprintf(ipadd, "%d.%d.%d.%d", sys.subnet[0], sys.subnet[1], sys.subnet[2], sys.subnet[3]);
+    printData(source, "Subnet mask:\t" + String(ipadd), true);
+    
+    sprintf(ipadd, "%d.%d.%d.%d", sys.gateway[0], sys.gateway[1], sys.gateway[2], sys.gateway[3]);
+    printData(source, "Gateway:\t" + String(ipadd), true);
+    
+    sprintf(ipadd, "%d.%d.%d.%d", sys.dns[0], sys.dns[1], sys.dns[2], sys.dns[3]);
+    printData(source, "DNS server:\t" + String(ipadd), true);
+  }
+  else if(textBuff.substring(0,8) == "addrelay")
+  {
+    int pin = textBuff.substring(9,11).toInt();
+    bool match = false;
+
+    for(int i=0;i<sizeof(unusablePins)/sizeof(int);i++)
+    {
+      if(pin == unusablePins[i])
+      {
+        match = true;
+        break;
+      }
+    }
+
+    if(match)
+    {
+      printData(source, "El pin " + String(pin) + " es inusalbe.", true);
+      return;
+    }
+    
+    if(pin < 0 || pin > 53)
+    {
+      printData(source, "Numero de pin invlalido: " + String(pin) + " (0-53).", true);
+    }
+    else
+    {
+      aux = first;
+      bool match = false;
+      
+      while(aux != NULL)
+      {
+        if((int)aux->relay.pin == pin)
+        {
+          match = true;
+        }
+        
+        aux = aux->next;
+      }
+  
+      if(match)
+      {
+        printData(source, "El pin ingresado ya esta en uso: " + String(pin), true);
+      }
+      else
+      {
+
+        aux = first;
+        bool match = false;
+        
+        while(aux != NULL)
+        {
+          if(aux->relay.deleted)
+          {
+            match = true;
+            break;
+          }
+          
+          aux = aux->next;
+        }
+
+        if(!match)
+        {
+          aux = (node_t *)malloc(sizeof(node_t));
+          aux->next = NULL; // Igualamos a NULL para que más abajo se sepa que es una nueva entrada de la lista
+        }
+        
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, HIGH);
+
+        aux->relay.type       = 200;    // 200 es el nro estándar para que sea reconocido en la EEPROM como un relé
+        aux->relay.pin        = pin;
+        aux->relay.enabled    = false;
+        sprintf(aux->relay.desc, "%s", "Sin descripcion");
+        aux->relay.startHour  = 0;
+        aux->relay.startMin   = 0;
+        aux->relay.endHour    = 0;
+        aux->relay.endMin     = 0;
+        aux->relay.deleted    = false;
+        aux->changeFlag       = true;
+        aux->overrided        = false;
+
+        if(aux->next == NULL)
+        {
+          if(first == NULL)
+          {
+            first = aux;
+            last  = aux;
+          }
+          else
+          {
+            last->next  = aux;
+            last        = aux;
+            //last->next  = NULL;   En este caso, next fue igualada a NULL al reservar memoria
+          }
+        }
+        
+        printData(source, "Se agrego un nuevo rele en el pin " + String(pin), true);
+      }
+    }
    
-   sprintf(ipadd, "%d.%d.%d.%d", subnet[0], subnet[1], subnet[2], subnet[3]);
-   printData(source, "Subnet mask:\t" + String(ipadd), true);
-   
-   sprintf(ipadd, "%d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
-   printData(source, "Gateway:\t" + String(ipadd), true);
-   
-   sprintf(ipadd, "%d.%d.%d.%d", dns[0], dns[1], dns[2], dns[3]);
-   printData(source, "DNS server:\t" + String(ipadd), true);
+    //printData(source, "PIN -" + String(pin) + "-", true);
+  }
+  else if(textBuff.substring(0,8) == "delrelay")
+  {
+    int pin = textBuff.substring(9,11).toInt();
+
+    aux = first;
+    bool match = false;
+    
+    while(aux != NULL)
+    {
+      if((int)aux->relay.pin == pin)
+      {
+        aux->relay.deleted = true;
+        printData(source, "Relay en pin " + String(pin) + " marcado como eliminado.", true);
+        match = true;
+        aux->changeFlag = true;
+      }
+      
+      aux = aux->next;
+    }
+
+    if(!match)
+    {
+      printData(source, "No se encontro un rele en el pin " + String(pin) + ".", true);
+    }
+  }
+  else if(textBuff.substring(0,6) == "reboot")
+  {
+    digitalWrite(resetPin, LOW);
+  }
+  else if(textBuff.substring(0,12) == "defragEeprom")
+  {
+    // Primero que nada, guardamos la configuracion actual
+    saveData(source);    
   }
   else
   {
-    printData(source, "Comando no reconocido.", true);
+    printData(source, "Comando no reconocido -" + textBuff + "-", true);
   }
   textBuff = "";
 }
