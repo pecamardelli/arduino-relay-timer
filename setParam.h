@@ -171,27 +171,10 @@ void setParam(String param, String source) {
       printData(source, "ERROR! Unknown parameter: -" + param.substring(7) + "-", true);
     }
   }
-  else if(param.substring(0,4) == "help"){
-    printData(source, "'set' command arguments:", true);
-    printData(source, "\trelay(0-50)pin (0-50)\t\t-> Change the pin number of the given relay.", true);
-    printData(source, "\trelay(0-50)enable (0-1)\t\t-> Enable the given relay.", true);
-    printData(source, "\trelay(0-50)desc (descripcion)\t-> Set relay description.", true);
-    printData(source, "\trelay(0-50)starth (-23)\t\t-> Set the starting hour of the given relay.", true);
-    printData(source, "\trelay(0-50)startm (-59)\t\t-> Set the starting minute of the given relay.", true);
-    printData(source, "\trelay(0-50)endh (-23)\t\t-> Set the ending hour of the given relay.", true);
-    printData(source, "\trelay(0-50)endm (-59)\t\t-> Set the ending minute of the given relay.", true);
-    printData(source, "\trelay(0-50)resume\t\t-> Resumes the given relay.", true);
-    printData(source, "\thostname\t\t\t-> Set the device name.", true);
-    printData(source, "\tipadrress\t\t\t-> Set IP address.", true);
-    printData(source, "\tsubnet\t\t\t\t-> Set subnet mask.", true);
-    printData(source, "\tgateway\t\t\t\t-> Set default gateway.", true);
-    printData(source, "\tdns\t\t\t\t-> Set the DNS server.", true);
-    printData(source, "\tdatetime (xx:xx:xx xx/xx/xxxx)\t-> Set date and time.", true);
-  }
   else if(param.substring(0,8) == "hostname") {
-    param.substring(9).toCharArray(sys.hostName, 32);
+    param.substring(9).toCharArray(sys.hostname, 32);
     sysChangeFlag = true;
-    printData(source, "\nHostname set to: " + String(sys.hostName), true);
+    printData(source, "\nHostname set to: " + String(sys.hostname), true);
   }
   else if(param.substring(0,9) == "ipaddress") {
     //char ipa[32];

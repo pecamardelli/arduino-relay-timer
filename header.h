@@ -7,27 +7,54 @@
 
 // ----------- MISC ------------- //
 
-#define MAX_COMMAND_LENGTH  64
+#define BAUD_RATE           9600
+#define MAX_COMMAND_LEN     64
 #define MAX_COMMAND_ARGS    10
+#define MAX_HOSTNAME_LEN    32
+#define MAX_RELAY_NUMBER    50
+
+// Communication types
+#define COMM_SERIAL      0
+#define COMM_TELNET      1
+
+// Type of address passed to setAddress function
+#define IP_ADDRESS       0
+#define SUBNET_MASK      1
+#define DEFAULT_GATEWAY  2
+#define DNS_SERVER       3
 
 // ----------- FUNCTION DECLARATIONS ----------- //
 
-void loadSystemData();
-String getDate();
+void parser(String source, char *command);
+void setParam(String param, String source);
+void saveData(String source);
+void checkRelays();
+void addRelay(String source, char *_pin);
+void deleteRelay(String source, char *_pin);
+
+// Getter functions - Defined in getters.h //
+void getRelayInfo(String source);
 void getReceivedText(String source);
-void parseReceivedText(String source, char *command);
+String getDate();
+
+// Setter functions - Defined in setters.h //
+void setHostname(String source, char *_name);
+void setAddress(String source, char *_address, char *_type);
+void setDateTime(String source, char *_datetime);
+
+// Utilities - Defined in utils.h
+String arrayToString(byte array[], unsigned int len);
+void clearArgs(char **args);
+void loadSystemData();
+void checkConnectionTimeout();
+void closeConnection();
+
+// Data printing - Defined in printFunctions.h
 void printPrompt();
 void printData(String source, String data, bool rc);
 void printHelp(String source);
+void printSetHelp(String source);
 void printIpAddress(String source);
-void closeConnection();
-void setParam(String param, String source);
-void saveData(String source);
-String arrayToString(byte array[], unsigned int len);
-void checkRelays();
-void getRelayInfo(String source);
-void addRelay(String source);
-void deleteRelay(String source);
 
 // ----------- BOARD TYPES ----------- //
 
@@ -91,8 +118,7 @@ RTC_DS1307 RTC;
 
 // ----------- RELAYS ----------- //
 
-int   relayQuantity     = 0;
-int   relayMaxQuantity  = 50;   // No permitir más de 50 relés... Por cantidad de EEPROM y pines.
+byte   relayQuantity     = 0;
 
 typedef struct relayData {
   byte  type;
@@ -119,24 +145,24 @@ node_t *first = NULL, *last = NULL, *aux = NULL;
 // ----------- SYSTEM ----------- //
 
 typedef struct systemData {
-  char   hostName[32];
+  char   hostname[32];
   byte   mac[6];
   byte   ip[4];
   byte   subnet[4];
   byte   gateway[4];
   byte   dns[4];
+  byte   resetPin;
 };
 
 struct  systemData sys;
 
 int     eeAddress       = 0;
 bool    sysChangeFlag   = false;
-String  days[]          = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
-String  sysVersion      = "1.6";
-String  statuses[]       = { "ON", "OFF" };
-int     resetPin        = 9;
+String  days[]          = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+String  sysVersion      = "1.7.0";
+String  statuses[]      = { "ON", "OFF" };
 unsigned long tstamp    = 0;
-int     unusablePins[]  = { 9, 10, 11, 12, 13 };
+const int     unusablePins[]  = { 9, 10, 11, 12, 13 };
 
 // ----------- TELNET SERVER ----------- //
 

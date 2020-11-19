@@ -1,3 +1,9 @@
+void clearArgs(char **args) {
+  for(byte i=0; i<MAX_COMMAND_ARGS; i++) {
+    args[i] = "";
+  }
+}
+
 void loadSystemData() {
   // LOAD SYSTEM CONFIGURATIONS
   // They're stored at the end of the EEPROM.
@@ -6,11 +12,19 @@ void loadSystemData() {
   eeAddress = EEPROM.length() - sizeof(systemData) - 1;
   EEPROM.get(eeAddress, sys);
 
+  // Set a default mac address if it's not defined.
+  if(sys.mac[0] == 0xff) sys.mac[0] = 0xDE;
+  if(sys.mac[1] == 0xff) sys.mac[1] = 0xAD;
+  if(sys.mac[2] == 0xff) sys.mac[2] = 0xBE;
+  if(sys.mac[3] == 0xff) sys.mac[3] = 0xEF;
+  if(sys.mac[4] == 0xff) sys.mac[4] = 0xF0;
+  if(sys.mac[5] == 0xff) sys.mac[5] = 0x18;
+  
   Serial.print(F("Starting ethernet shield: "));
   Ethernet.begin(sys.mac, sys.ip, sys.dns, sys.gateway, sys.subnet);
   Serial.println(F("done."));
 
-  int pos       = 0;
+  byte pos      = 0;
   relayQuantity = 0;
   eeAddress     = 0;
 
@@ -18,7 +32,7 @@ void loadSystemData() {
 
   // From byte 0 to 100 is stored the "file system". Every two bytes is an integer
   // that represents a memory address where the relay data is stored on the EEPROM.
-  for(int i=0;i<50;i++) {
+  for(byte i=0;i<MAX_RELAY_NUMBER;i++) {
     EEPROM.get(eeAddress, pos);
   }
   
@@ -77,4 +91,19 @@ String arrayToString(byte array[], unsigned int len) {
   
   buffer[len*3] = '\0';
   return String(buffer);
+}
+
+void checkConnectionTimeout() {
+  if(millis() - timeOfLastActivity > allowedConnectTime) {
+    client.println();
+    client.println(F("Timeout disconnect."));
+    client.stop();
+    connectFlag = 0;
+  }
+}
+
+void closeConnection() {
+  client.println(F("\nBye.\n"));
+  client.stop();
+  connectFlag = 0;
 }

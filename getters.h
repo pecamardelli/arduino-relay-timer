@@ -13,16 +13,16 @@ void getReceivedText(String source) {
   char c;
   byte charsWaiting  = 0;
   byte charsReceived = 0;
-  char *command;
+  char *command = NULL;
   
   if(source == "telnet") {
     charsWaiting = client.available();    
 
     if (!charsWaiting) return;
 
-    if (charsWaiting > MAX_COMMAND_LENGTH) {
+    if (charsWaiting > MAX_COMMAND_LEN) {
       client.print(F("Command must have a maximum of "));
-      client.print(String(MAX_COMMAND_LENGTH));
+      client.print(String(MAX_COMMAND_LEN));
       client.println(F(" characters."));
       return;
     }
@@ -32,34 +32,47 @@ void getReceivedText(String source) {
     
     while(charsWaiting > 0) {
       c = client.read();
-       
-      if (isalpha(c) or isdigit(c) or c == 0x20 or c == 0x00) {
-        //textBuff += (char)c;
+
+      // Include letters, digits, space (0x20), hyphen (0x2d) and dot (0x2e).
+      if (isalpha(c) or
+          isdigit(c) or
+          c == 0x20 or
+          c == 0x2d or
+          c == 0x2e) {
         command[charsReceived] = (char)c;
         charsReceived++;
       }
       else if (c == 0x0d) {   // Carriage return. Parse command.
-        // Jump to parseReceivedText
+        // Add space character to the end of the string in order to give strtok the ability
+        // to slice it and avoid taking any garbage from memory.
+        // See parser function.
+        command[charsReceived] = (char)0x20;
         break;
       }
       charsWaiting--;
     }
   }
   else if(source == "serial") {
-    command = (char*) malloc (MAX_COMMAND_LENGTH*sizeof(char));
+    command = (char*) malloc (MAX_COMMAND_LEN*sizeof(char));
     while(Serial.available()) {
       c = (char)Serial.read();
       
-      if (isalpha(c) or isdigit(c) or c == 0x20) {
+      // Include letters, digits, space (0x20), hyphen (0x2d) and dot (0x2e).
+      if (isalpha(c) or
+          isdigit(c) or
+          c == 0x20 or
+          c == 0x2d or
+          c == 0x2e) {
         command[charsReceived] = (char)c;
         charsReceived++;
-        if (charsReceived >= 64) break;
+        if (charsReceived >= MAX_COMMAND_LEN) break;
       }
       delay(5);
     }
+    command[charsReceived] = (char)0x20;
   }
 
-  if (charsReceived) parseReceivedText(source, command);
+  if (charsReceived) parser(source, command);
   if (command) free(command);
 }
 
