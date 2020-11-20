@@ -1,11 +1,11 @@
 void setParam(String param, String source) {
-  //printData(source, "-" + param.substring(0,5) + "-" + param.substring(6,13) + "-", true);
+  //printData("-" + param.substring(0,5) + "-" + param.substring(6,13) + "-", true);
   if(param.substring(0,5) == "relay") {
     bool match  = false;
     int num     = param.substring(5, 7).toInt();
-    //printData(source, String(num) + "-" + param, true);
+    //printData(String(num) + "-" + param, true);
     
-    aux = first;
+    node_t *aux = first;
     while(aux != NULL) {
       if(aux->relay.pin == num) {
         match = true;
@@ -15,18 +15,18 @@ void setParam(String param, String source) {
     }
 
     if(!match) {
-      printData(source, "No relay found at pin " + String(num), true);
+      printData("No relay found at pin " + String(num), true);
       return;
     }
 
-    //printData(source, "Success! " + String(num), true); return;
+    //printData("Success! " + String(num), true); return;
 
     if(param.substring(7,13) == "enable") {
       int val = param.substring(14, 15).toInt();
       switch(val) {
         case 0:
           aux->relay.enabled = 0;
-          printData(source, "Pin " +
+          printData("Pin " +
               String(aux->relay.pin) +
               "(" + String(aux->relay.desc) +
               ") desactivado.", true);
@@ -34,29 +34,29 @@ void setParam(String param, String source) {
           break;
         case 1:
           aux->relay.enabled = 1; 
-          printData(source, "Pin " +
+          printData("Pin " +
               String(aux->relay.pin) +
               "(" + String(aux->relay.desc) +
               ") activado.", true);
           aux->changeFlag = true;
           break;
-        default: printData(source, "ERROR! Invalid value: " + String(val), true); return;
+        default: printData("ERROR! Invalid value: " + String(val), true); return;
       }
     }
     else if(param.substring(7,11) == "desc") {
       param.substring(12).toCharArray(aux->relay.desc, 32);
       aux->changeFlag = true;
-      printData(source, "Pin " + String(aux->relay.pin) + " - Description: " + String(aux->relay.desc) + ".", true);
+      printData("Pin " + String(aux->relay.pin) + " - Description: " + String(aux->relay.desc) + ".", true);
     }
     else if(param.substring(7,13) == "starth") {
       int val = param.substring(14).toInt();
       if(val >= 0 && val <= 23) {
         aux->relay.startHour = val;
         aux->changeFlag = true;
-        printData(source, "Pin " + String(aux->relay.pin) + " - Starting hour: " + String(val), true);
+        printData("Pin " + String(aux->relay.pin) + " - Starting hour: " + String(val), true);
       }
       else {
-        printData(source, "ERROR! Invalid starting hour -" + String(val) + "-", true);
+        printData("ERROR! Invalid starting hour -" + String(val) + "-", true);
         return;
       }
     }
@@ -65,10 +65,10 @@ void setParam(String param, String source) {
       if(val >= 0 && val <= 59) {
         aux->relay.startMin = val;
         aux->changeFlag = true;
-        printData(source, "Pin " + String(aux->relay.pin) + " - Starting minute: " + String(val), true);
+        printData("Pin " + String(aux->relay.pin) + " - Starting minute: " + String(val), true);
       }
       else {
-        printData(source, "ERROR! Invalid starting minute -" + String(val) + "-", true);
+        printData("ERROR! Invalid starting minute -" + String(val) + "-", true);
         return;
       }
     }
@@ -77,10 +77,10 @@ void setParam(String param, String source) {
       if(val >= 0 && val <= 23) {
         aux->relay.endHour = val;
         aux->changeFlag = true;
-        printData(source, "Pin " + String(aux->relay.pin) + " - Stopping hour: " + String(val), true);
+        printData("Pin " + String(aux->relay.pin) + " - Stopping hour: " + String(val), true);
       }
       else {
-        printData(source, "ERROR! Invalid stopping hour -" + String(val) + "-", true);
+        printData("ERROR! Invalid stopping hour -" + String(val) + "-", true);
         return;
       }
     }
@@ -89,23 +89,23 @@ void setParam(String param, String source) {
       if(val >= 0 && val <= 59) {
         aux->relay.endMin = val;
         aux->changeFlag = true;
-        printData(source, "Pin " + String(aux->relay.pin) + " - Stopping minute: " + String(val), true);
+        printData("Pin " + String(aux->relay.pin) + " - Stopping minute: " + String(val), true);
       }
       else {
-        printData(source, "ERROR! Invalid stopping minute -" + String(val) + "-", true);
+        printData("ERROR! Invalid stopping minute -" + String(val) + "-", true);
         return;
       }
     }
     else if(param.substring(7,13) == "resume") {
       aux->overrided  = false;
-      printData(source, "Pin " +
+      printData("Pin " +
               String(aux->relay.pin) +
               "(" + String(aux->relay.desc) +
               ") normalizado.", true);
     }
     else if(param.substring(7,10) == "pin") {
       int pin = param.substring(11,13).toInt();
-      //printData(source, "PIN :" + String(pin), true);
+      //printData("PIN :" + String(pin), true);
       
       bool match = false;
   
@@ -117,12 +117,12 @@ void setParam(String param, String source) {
       }
   
       if(match) {
-        printData(source, "Pin " + String(pin) + " is unusable.", true);
+        printData("Pin " + String(pin) + " is unusable.", true);
         return;
       }
 
       if(pin < 0 || pin > 53) {
-        printData(source, "ERROR! Pin number out of range: " + String(pin) + " (0-53).", true);
+        printData("ERROR! Pin number out of range: " + String(pin) + " (0-53).", true);
         return;
       }
 
@@ -140,13 +140,13 @@ void setParam(String param, String source) {
       }
 
       if(match) {
-        printData(source, "ERROR! Pin " + String(pin) + " is already in use.", true);
+        printData("ERROR! Pin " + String(pin) + " is already in use.", true);
         return;
       }
 
       aux->relay.pin  = pin;
       aux->changeFlag = true;
-      printData(source, "Pin " + String(pin) + " successfully updated (" + String(aux->relay.desc) + ")", true);
+      printData("Pin " + String(pin) + " successfully updated (" + String(aux->relay.desc) + ")", true);
       
     }
     else if(param.substring(7,9) == "on") {
@@ -155,7 +155,7 @@ void setParam(String param, String source) {
         aux->overrided  = true;
       }
       else {
-        printData(source, "ERROR! Relay at pin " + String(num) + " was deleted.", true);
+        printData("ERROR! Relay at pin " + String(num) + " was deleted.", true);
       }
     }
     else if(param.substring(7,10) == "off") {
@@ -164,17 +164,17 @@ void setParam(String param, String source) {
         aux->overrided  = true;
       }
       else {
-        printData(source, "ERROR! Relay at pin " + String(num) + " was deleted.", true);
+        printData("ERROR! Relay at pin " + String(num) + " was deleted.", true);
       }
     }
     else {
-      printData(source, "ERROR! Unknown parameter: -" + param.substring(7) + "-", true);
+      printData("ERROR! Unknown parameter: -" + param.substring(7) + "-", true);
     }
   }
   else if(param.substring(0,8) == "hostname") {
     param.substring(9).toCharArray(sys.hostname, 32);
     sysChangeFlag = true;
-    printData(source, "\nHostname set to: " + String(sys.hostname), true);
+    printData("\nHostname set to: " + String(sys.hostname), true);
   }
   else if(param.substring(0,9) == "ipaddress") {
     //char ipa[32];
@@ -185,12 +185,12 @@ void setParam(String param, String source) {
     IPAddress addr;
     if (addr.fromString(ipp)) {
       // it was a valid address, do something with it 
-      printData(source, "IP successfully updated : " +
+      printData("IP successfully updated : " +
                         String(addr[0], DEC) + "." +
                         String(addr[1], DEC) + "." +
                         String(addr[2], DEC) + "." +
                         String(addr[3], DEC), true);
-      printData(source, "save & reboot to apply changes.", true);
+      printData("save & reboot to apply changes.", true);
       sys.ip[0]        = addr[0];
       sys.ip[1]        = addr[1];
       sys.ip[2]        = addr[2];
@@ -198,7 +198,7 @@ void setParam(String param, String source) {
       sysChangeFlag = true;      
     }
     else {
-      printData(source, "Invalid IP address : -" + ipp + "-", true);
+      printData("Invalid IP address : -" + ipp + "-", true);
     }
   }
   else if(param.substring(0,6) == "subnet") {
@@ -208,12 +208,12 @@ void setParam(String param, String source) {
     IPAddress addr;
     if (addr.fromString(ipa)) {
       // it was a valid address, do something with it 
-      printData(source, "Subnet mask successfully updated : " +
+      printData("Subnet mask successfully updated : " +
                         String(addr[0], DEC) + "." +
                         String(addr[1], DEC) + "." +
                         String(addr[2], DEC) + "." +
                         String(addr[3], DEC), true);
-      printData(source, "save & reboot to apply changes.", true);
+      printData("save & reboot to apply changes.", true);
       sys.subnet[0] = addr[0];
       sys.subnet[1] = addr[1];
       sys.subnet[2] = addr[2];
@@ -221,7 +221,7 @@ void setParam(String param, String source) {
       sysChangeFlag = true;      
     }
     else {
-      printData(source, "Invalid subnet mask: " + String(ipa), true);
+      printData("Invalid subnet mask: " + String(ipa), true);
     }
   }
   else if(param.substring(0,7) == "gateway") {
@@ -231,12 +231,12 @@ void setParam(String param, String source) {
     IPAddress addr;
     if (addr.fromString(ipa)) {
       // it was a valid address, do something with it 
-      printData(source, "Default gateway successfully updated: " +
+      printData("Default gateway successfully updated: " +
                         String(addr[0], DEC) + "." +
                         String(addr[1], DEC) + "." +
                         String(addr[2], DEC) + "." +
                         String(addr[3], DEC), true);
-      printData(source, "save & reboot to apply changes.", true);
+      printData("save & reboot to apply changes.", true);
       sys.gateway[0]  = addr[0];
       sys.gateway[1]  = addr[1];
       sys.gateway[2]  = addr[2];
@@ -244,7 +244,7 @@ void setParam(String param, String source) {
       sysChangeFlag   = true;      
     }
     else {
-      printData(source, "Invalid default gateway: " + String(ipa), true);
+      printData("Invalid default gateway: " + String(ipa), true);
     }
   }
   else if(param.substring(0,3) == "dns") {
@@ -254,12 +254,12 @@ void setParam(String param, String source) {
     IPAddress addr;
     if (addr.fromString(ipa)) {
       // it was a valid address, do something with it 
-      printData(source, "DNS server successfully updated: " +
+      printData("DNS server successfully updated: " +
                         String(addr[0], DEC) + "." +
                         String(addr[1], DEC) + "." +
                         String(addr[2], DEC) + "." +
                         String(addr[3], DEC), true);
-      printData(source, "save & reboot to apply changes.", true);
+      printData("save & reboot to apply changes.", true);
       sys.dns[0]    = addr[0];
       sys.dns[1]    = addr[1];
       sys.dns[2]    = addr[2];
@@ -267,7 +267,7 @@ void setParam(String param, String source) {
       sysChangeFlag = true;      
     }
     else {
-      printData(source, "Invalid DNS server: " + String(ipa), true);
+      printData("Invalid DNS server: " + String(ipa), true);
     }
   }
   else if(param.substring(0,8) == "datetime") {
@@ -277,17 +277,17 @@ void setParam(String param, String source) {
     
     if (sscanf(str, "%d:%d:%d %d/%d/%d", &date[0], &date[1], &date[2], &date[3], &date[4], &date[5]) == 6) {
       if(date[0] < 0 || date[0] > 23) {
-        printData(source, "ERROR! Hour out of range: " + String(date[0]), true); 
+        printData("ERROR! Hour out of range: " + String(date[0]), true); 
         return;
       }
 
       if(date[1] < 0 || date[1] > 59) {
-        printData(source, "ERROR! Minute out of range: " + String(date[1]), true); 
+        printData("ERROR! Minute out of range: " + String(date[1]), true); 
         return;
       }
 
       if(date[2] < 0 || date[2] > 59) {
-        printData(source, "ERROR! Second out of range: " + String(date[2]), true); 
+        printData("ERROR! Second out of range: " + String(date[2]), true); 
         return;
       }
 
@@ -298,44 +298,44 @@ void setParam(String param, String source) {
            date[4] == 6 ||
            date[4] == 9 ||
            date[4] == 11)) {
-          printData(source, "ERROR! Month " + String(date[4]) + " do not have 31 days.", true);
+          printData("ERROR! Month " + String(date[4]) + " do not have 31 days.", true);
           return;
         }
 
         if(date[4] == 2 && date[3] == 29) {
           int x = date[5] % 4;
           if(x != 0) {
-            printData(source, "ERROR! Year " + String(date[5]) + " is not a leap-year.\n February cannot have 29 days.", true);
+            printData("ERROR! Year " + String(date[5]) + " is not a leap-year.\n February cannot have 29 days.", true);
             return;
           }
         }        
       }
       else {
-        printData(source, "ERROR! The day is out of range: " + String(date[3]), true); 
+        printData("ERROR! The day is out of range: " + String(date[3]), true); 
         return;
       }
 
       if(date[4] < 0 || date[4] > 12) {
-        printData(source, "ERROR! The month is out of range: " + String(date[4]), true); 
+        printData("ERROR! The month is out of range: " + String(date[4]), true); 
         return;
       }
 
       if(date[5] < 2018) {
-        printData(source, "ERROR! Unless you'v travelled back in time, you cannot be in the year " + String(date[5]) + ".", true); 
+        printData("ERROR! Unless you'v travelled back in time, you cannot be in the year " + String(date[5]) + ".", true); 
         return;
       }
 
       if(date[5] > 2099) {
-        printData(source, "ERROR! I don't think this device will be still alive beyond the year 2099.", true); 
+        printData("ERROR! I don't think this device will be still alive beyond the year 2099.", true); 
         return;
       }
       
       //setTime(date[0],date[1],date[2],date[3],date[4],date[5]);
       RTC.adjust(DateTime(date[5],date[4],date[3],date[0],date[1],date[2]));
-      printData(source, "Date successfully updated: " + String(getDate()), true);
+      printData("Date successfully updated: " + String(getDate()), true);
     }
     else {
-      printData(source, "Invalid date: " + 
+      printData("Invalid date: " + 
                 String(date[0]) + ":" +
                 String(date[1]) + ":" +
                 String(date[2]) + " " +
@@ -345,6 +345,6 @@ void setParam(String param, String source) {
     }    
   }
   else {
-    printData(source, "Unknown parameter: -" + param + "-", true);
+    printData("Unknown parameter: -" + param + "-", true);
   }
 }

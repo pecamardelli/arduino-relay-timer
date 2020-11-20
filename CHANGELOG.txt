@@ -1,0 +1,9 @@
+Relay Timer V 1.7.1
+Friday, november 20 of 2020
+
+1)	Refactor the entire code.
+2)	Separate every functionality in a single function.
+3)	Change the command parsing method.
+4)	Fix command prompt bug when connecting via telnet.
+5)	Add uptime tracking when a relay is on.
+6)	Use of flashStringHelper function in order to reduce RAM memory consumption.

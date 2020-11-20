@@ -1,27 +1,27 @@
-void setHostname(String source, char *_name) {
+void setHostname(char *_name) {
   if(strlen(_name) == 0)
-    return printData(source, F("Hostname cannot be an empty string."), true);
+    return printData(F("Hostname cannot be an empty string."), true);
     
   if(strlen(_name) > MAX_HOSTNAME_LEN)
-    return printData(source, F("Hostname exceeds maximum length."), true);
+    return printData(F("Hostname exceeds maximum length."), true);
 
   // Looks like we're good...
-  printData(source, _name, true);
+  printData(_name, true);
   strcpy(sys.hostname, _name);
 
   // Inform that changes were made.
   sysChangeFlag = true;
   
-  printData(source, F("Hostname set to: "), false);
-  printData(source, String(sys.hostname), true);
+  printData(F("Hostname set to: "), false);
+  printData(String(sys.hostname), true);
 }
 
-void setAddress(String source, char *_address, int _type) {
+void setAddress(char *_address, int _type) {
   IPAddress addr;
   // Check validity
   if (!addr.fromString(_address)) {
-    printData(source, F("Invalid address: "), false);
-    printData(source, _address, true);
+    printData(F("Invalid address: "), false);
+    printData(_address, true);
     return;
   }
 
@@ -52,99 +52,91 @@ void setAddress(String source, char *_address, int _type) {
       break;
   }
   // it was a valid address, do something with it 
-  printData(source, F("Parameter successfully updated: "), false);
-  printData(source, String(addr[0], DEC) + "." +
+  printData(F("Parameter successfully updated: "), false);
+  printData(String(addr[0], DEC) + "." +
                     String(addr[1], DEC) + "." +
                     String(addr[2], DEC) + "." +
                     String(addr[3], DEC), true);
-  printData(source, F("Save & reboot to apply changes."), true);
+  printData(F("Save & reboot to apply changes."), true);
   sysChangeFlag = true;
 }
 
-void setDateTime(String source, char *_datetime) {
-  byte  _hour;
-  byte  _min;
-  byte  _sec;
+void setDateTime(char *_date, char *_time) {
+  int  _hour;
+  int  _min;
+  int  _sec;
   int   _year;
-  byte  _month;
-  byte  _day;
+  int  _month;
+  int  _day;
+
+  if(sscanf(_date, "%d/%d/%d", &_year, &_month, &_day) != 3) return printData(F("Bad date format (YYYY/MM/DD)"), true);
+  if(sscanf(_time, "%d:%d:%d", &_hour, &_min, &_sec) != 3) return printData(F("Bad time format (HH:MM:SS)"), true);
   
-  if (sscanf(_datetime, "%d/%d/%d %d:%d:%d", &_year, &_month, &_day, &_hour, &_min, &_sec) == 6) {
-    if(_hour < 0 || _hour > 23) {
-      printData(source, F("ERROR! Hour out of range: "), false);
-      printData(source, String(_hour), true); 
+  if(_hour < 0 || _hour > 23) {
+    printData(F("ERROR! Hour out of range: "), false);
+    printData(String(_hour), true); 
+    return;
+  }
+
+  if(_min < 0 || _min > 59) {
+    printData(F("ERROR! Minute out of range: "), false);
+    printData(String(_min), true); 
+    return;
+  }
+
+  if(_sec < 0 || _sec > 59) {
+    printData(F("ERROR! Second out of range: "), false);
+    printData(String(_sec), true); 
+    return;
+  }
+
+  if(_day >= 0 || _day <= 31) {
+    if(_day == 31 &&
+       (_month == 2 ||
+       _month == 4 ||
+       _month == 6 ||
+       _month == 9 ||
+       _month == 11)) {
+      printData(F("ERROR! Month "), false);
+      printData(String(_month), false);
+      printData(F(" does not have 31 days."), true);
       return;
     }
 
-    if(_min < 0 || _min > 59) {
-      printData(source, F("ERROR! Minute out of range: "), false);
-      printData(source, String(_min), true); 
-      return;
-    }
-
-    if(_sec < 0 || _sec > 59) {
-      printData(source, F("ERROR! Second out of range: "), false);
-      printData(source, String(_sec), true); 
-      return;
-    }
-
-    if(_day >= 0 || _day <= 31) {
-      if(_day == 31 &&
-         (_month == 2 ||
-         _month == 4 ||
-         _month == 6 ||
-         _month == 9 ||
-         _month == 11)) {
-        printData(source, F("ERROR! Month "), false);
-        printData(source, String(_month), false);
-        printData(source, F(" does not have 31 days."), true);
+    if(_month == 2 && _day == 29) {
+      int x = _year % 4;
+      if(x != 0) {
+        printData(F("ERROR! Year "), false);
+        printData(String(_year), false);
+        printData(F(" is not a leap-year.\n February cannot have 29 days."), true);
         return;
       }
-
-      if(_month == 2 && _day == 29) {
-        int x = _year % 4;
-        if(x != 0) {
-          printData(source, F("ERROR! Year "), false);
-          printData(source, String(_year), false);
-          printData(source, F(" is not a leap-year.\n February cannot have 29 days."), true);
-          return;
-        }
-      }        
-    }
-    else {
-      printData(source, F("ERROR! The day is out of range: "), false);
-      printData(source, String(_day), true); 
-      return;
-    }
-
-    if(_month < 0 || _month > 12) {
-      printData(source, F("ERROR! The month is out of range: "), false);
-      printData(source, String(_month), true); 
-      return;
-    }
-
-    if(_year < 2018) {
-      printData(source, F("ERROR! Unless you'v travelled back in time, you cannot be in the year "), false);
-      printData(source, String(_year) + ".", true); 
-      return;
-    }
-
-    if(_year > 2099) {
-      printData(source, F("ERROR! I don't think this device will be still alive beyond the year 2099."), true); 
-      return;
-    }
-    
-    RTC.adjust(DateTime(_year,_month,_day,_hour,_min,_sec));
-    printData(source, F("Date successfully updated: "), false);
-    printData(source, String(getDate()), true);
+    }        
   }
   else {
-    printData(source, F("Invalid date: "), false);
-    printData(source, String(_hour) + ":" +
-              String(_min) + ":" +
-              String(_sec) + " " +
-              String(_day) + "/" +
-              String(_month) + "/" +
-              String(_year), true);
+    printData(F("ERROR! The day is out of range: "), false);
+    printData(String(_day), true); 
+    return;
   }
+
+  if(_month < 0 || _month > 12) {
+    printData(F("ERROR! The month is out of range: "), false);
+    printData(String(_month), true); 
+    return;
+  }
+
+  if(_year < 2018) {
+    printData(F("ERROR! Unless you'v travelled back in time, you cannot be in the year "), false);
+    printData(String(_year) + ".", true); 
+    return;
+  }
+
+  if(_year > 2099) {
+    printData(F("ERROR! I don't think this device will be still alive beyond the year 2099."), true); 
+    return;
+  }
+  
+  RTC.adjust(DateTime(_year,_month,_day,_hour,_min,_sec));
+  printData(F("Date successfully updated: "), false);
+  printData(String(getDate()), true);
 }

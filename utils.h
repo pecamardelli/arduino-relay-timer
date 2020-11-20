@@ -1,3 +1,45 @@
+String parseUpTime(unsigned long startTime) {
+  unsigned long diff = millis() - startTime;
+  int _days = 0;
+  int _hours = 0;
+  int _mins = 0;
+  int _secs = 0;
+
+  while(diff >= 84600000) {
+    diff -= 84600000;
+    _days++;
+  }
+
+  while(diff >= 3600000){
+    diff -= 3600000;
+    _hours++;
+  }
+
+  while(diff >= 60000){
+    diff -= 60000;
+    _mins++;
+  }
+
+  while(diff >= 1000){
+    diff -= 1000;
+    _secs++;
+  }
+
+  String d = (_days < 10) ? "0" + String(_days) : String(_days);
+  String h = (_hours < 10) ? "0" + String(_hours) : String(_hours);
+  String m = (_mins < 10) ? "0" + String(_mins) : String(_mins);
+  String s = (_secs < 10) ? "0" + String(_secs) : String(_secs);
+  
+  return d + "d " + h + ":" + m + ":" + s;
+}
+
+bool charAllowed(char c) {
+  for(byte i=0; i<sizeof(specialChars)/sizeof(byte);i++) {
+    if (c == specialChars[i]) return true;
+  }
+  return false;
+}
+
 void clearArgs(char **args) {
   for(byte i=0; i<MAX_COMMAND_ARGS; i++) {
     args[i] = "";
@@ -37,9 +79,9 @@ void loadSystemData() {
   }
   
   do {
-    aux = (node_t *)malloc(sizeof(node_t));
+    node_t *aux = (node_t *)malloc(sizeof(node_t));
     
-    if (aux == NULL) {
+    if (!aux) {
         Serial.print(F("ERROR: Could not allocate memory. "));
         Serial.print(String(relayQuantity));
         Serial.println(F(" relay(s) loaded."));
@@ -48,23 +90,27 @@ void loadSystemData() {
       EEPROM.get(eeAddress, aux->relay);
   
       if(aux->relay.type == 200) {
-        if(first == NULL) {
-          first       = aux;
-          first->next = NULL;
-          last        = first;
-        } else {
-          last->next  = aux;
-          last        = aux;
-          last->next  = NULL;
+        if (!aux->relay.deleted) {
+          if(first == NULL) {
+            first       = aux;
+            first->next = NULL;
+            last        = first;
+          } else {
+            last->next  = aux;
+            last        = aux;
+            last->next  = NULL;
+          }
+    
+          pinMode(aux->relay.pin, OUTPUT);
+          digitalWrite(aux->relay.pin, HIGH);
+          aux->changeFlag = false;
+          aux->overrided  = false;
+    
+          relayQuantity++;
         }
-  
-        pinMode(aux->relay.pin, OUTPUT);
-        digitalWrite(aux->relay.pin, HIGH);
-        aux->changeFlag = false;
-        aux->overrided  = false;
-        
+        else free(aux);
+
         eeAddress += sizeof(relayData);
-        relayQuantity++;
       } else {
         Serial.print(F("All relays loaded. Total: "));
         Serial.println(String(relayQuantity));
@@ -106,4 +152,5 @@ void closeConnection() {
   client.println(F("\nBye.\n"));
   client.stop();
   connectFlag = 0;
+  output = COMM_SERIAL;
 }

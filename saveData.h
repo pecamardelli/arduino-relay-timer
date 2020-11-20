@@ -1,8 +1,8 @@
-void saveData(String source) {
-  printData(source, F("Saving changes to EEPROM..."), true);
+void saveData() {
+  printData(F("Saving changes to EEPROM..."), true);
   
   int q = 0;
-  aux       = first;
+  node_t *aux = first;
   eeAddress = 0;
 
   while(aux != NULL) {
@@ -15,7 +15,7 @@ void saveData(String source) {
     aux = aux->next;
   }
 
-  printData(source, String(q) + " relays updated.", true);
+  printData(String(q) + " relays updated.", true);
   
   if(sysChangeFlag) {
     eeAddress = EEPROM.length() - sizeof(systemData) - 1;
@@ -29,7 +29,7 @@ void saveData(String source) {
     sys.mac[5] = 0xED;
     */
     EEPROM.put(eeAddress, sys);
-    printData(source, F("System data saved."), true);
+    printData(F("System data saved."), true);
     sysChangeFlag = false;
   }
 }

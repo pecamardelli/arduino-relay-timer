@@ -4,11 +4,10 @@
 #include "utils.h"
 #include "getters.h"
 #include "setters.h"
-#include "parser.h"
 #include "printFunctions.h"
-#include "setParam.h"
 #include "saveData.h"
 #include "relayFunctions.h"
+#include "parser.h"
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -38,26 +37,36 @@ void setup() {
 void loop() {
   if(server.available() && !connectFlag) {
     connectFlag = 1;
+    output = COMM_TELNET;
     client = server.available();
-    client.flush();
     client.println(F("ARDUINO RELAY TIMER"));
     client.print(BOARD);
     client.println(" - " + String(sys.hostname));
-    client.println("Version " + sysVersion);
+    client.print(F("Version "));
+    client.println(VERSION);
     client.println(F("Type 'help' to show all commands"));
-    client.flush();
+    printPrompt();
   }
 
   // Check to see if text received
   if (client.connected() && client.available()) {
-    getReceivedText("telnet");
+    getReceivedText();
     printPrompt();
   }
 
   // Check to see if connection has timed out
   if(connectFlag) checkConnectionTimeout();
 
-  if(Serial.available()) getReceivedText("serial");
+  if(Serial.available()) {
+    if (connectFlag) {
+      while(Serial.read() != -1) {}
+      printData(F("A telnet session is currently running..."), true);
+    }
+    else {
+      output = COMM_SERIAL;
+      getReceivedText();
+    }
+  }
     
   // Check relays every five seconds...
   if(millis() - tstamp >= 5000) {
