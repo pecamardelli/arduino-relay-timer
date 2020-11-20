@@ -34,13 +34,13 @@ void relayCommandHelp() {
 }
 
 void setCommandHelp() {
-  printData(F("set hostname\t\t\t\t--> Set the device name."), true);
-  printData(F("set ip\t\t\t\t\t--> Set IP address."), true);
-  printData(F("set mask\t\t\t\t--> Set subnet mask."), true);
-  printData(F("set gateway\t\t\t\t--> Set default gateway."), true);
-  printData(F("set dns\t\t\t\t\t--> Set the DNS server."), true);
-  printData(F("set mac\t\t\t\t\t--> Set the MAC address."), true);
-  printData(F("set datetime (xx/xx/xx xx:xx:xxxx)\t--> Set date and time."), true);
+  printData(F("set hostname\t--> Set the device name."), true);
+  printData(F("set ip\t\t--> Set IP address."), true);
+  printData(F("set mask\t--> Set subnet mask."), true);
+  printData(F("set gateway\t--> Set default gateway."), true);
+  printData(F("set dns\t\t--> Set the DNS server."), true);
+  printData(F("set mac\t\t--> Set the MAC address."), true);
+  printData(F("set datetime\t--> Set date and time. Format yyyy/mm/dd hh:mm:ss"), true);
 }
 
 // Send data to the current interface (telnet or serial)

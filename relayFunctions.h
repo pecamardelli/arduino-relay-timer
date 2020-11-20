@@ -263,11 +263,11 @@ void switchRelay(byte pin, uint8_t state, bool overrided) {
   node_t *target = searchRelay(pin);
 
   if (target) {
+    if (digitalRead(target->relay.pin) == HIGH && state == LOW) target->relay.startTime = millis();
+    if (digitalRead(target->relay.pin) == LOW && state == HIGH) target->relay.startTime = 0;
+    
     digitalWrite(target->relay.pin, state);
     target->overrided   = overrided;
-
-    if (state == LOW) target->relay.startTime = millis();
-    else target->relay.startTime = 0;
   }
 }
 

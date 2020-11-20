@@ -7,7 +7,7 @@
 
 // ----------- MISC ------------- //
 
-#define VERSION             F("1.7.0")
+#define VERSION             F("1.7.1")
 #define BAUD_RATE           9600
 #define MAX_COMMAND_LEN     64
 #define MAX_COMMAND_ARGS    10
