@@ -34,7 +34,8 @@ void getReceivedText() {
       while(charsWaiting > 0) {
         c = client.read();
   
-        // Include letters, digits, space (0x20), hyphen (0x2d) and dot (0x2e).
+        // Include letters, digits, and other allowed chars. Add more allowed characters
+        // at the definition of the specialChars array.
         if (isalpha(c) or isdigit(c) or charAllowed(c)) {
           command[charsReceived] = (char)c;
           charsReceived++;
@@ -54,7 +55,8 @@ void getReceivedText() {
       while(Serial.available()) {
         c = (char)Serial.read();
         
-        // Include letters, digits, space (0x20), hyphen (0x2d) and dot (0x2e).
+        // Include letters, digits, and other allowed chars. Add more allowed characters
+        // at the definition of the specialChars array.
         if (isalpha(c) or isdigit(c) or charAllowed(c)) {
           command[charsReceived] = (char)c;
           charsReceived++;

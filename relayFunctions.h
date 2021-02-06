@@ -272,7 +272,7 @@ void switchRelay(byte pin, uint8_t state, bool overrided) {
 }
 
 void getRelayInfo() {
-  printData(F("PIN\tENABLED\tDESCRIPTION\t\tSTART\tEND\tSTATUS\tUPTIME"), true);  
+  printData(F("PIN\tENABLED\tDESCRIPTION\t\SWITCH ON\tSWITCH OFF\tSTATUS\tUPTIME"), true);  
   node_t *aux = first;
 
   while(aux != NULL) {

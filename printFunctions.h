@@ -45,7 +45,7 @@ void setCommandHelp() {
 
 // Send data to the current interface (telnet or serial)
 void printData(String data, bool carriageReturn) {
-  // stdout is set when a connection arrives. Either COMM_TELNET or COMM_SERIAL can be used, one at a time. 
+  // output variable is set to COMM_TELNET when a connection arrives. Otherwise, is set to COMM_SERIAL. 
   switch(output) {
     case COMM_SERIAL:
       if(carriageReturn) Serial.println(data);

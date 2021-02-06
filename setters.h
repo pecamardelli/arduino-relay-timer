@@ -51,7 +51,7 @@ void setAddress(char *_address, int _type) {
       sys.dns[3]    = addr[3];
       break;
   }
-  // it was a valid address, do something with it 
+
   printData(F("Parameter successfully updated: "), false);
   printData(String(addr[0], DEC) + "." +
                     String(addr[1], DEC) + "." +
@@ -65,12 +65,15 @@ void setDateTime(char *_date, char *_time) {
   int  _hour;
   int  _min;
   int  _sec;
-  int   _year;
+  int  _year;
   int  _month;
   int  _day;
 
-  if(sscanf(_date, "%d/%d/%d", &_year, &_month, &_day) != 3) return printData(F("Bad date format (YYYY/MM/DD)"), true);
-  if(sscanf(_time, "%d:%d:%d", &_hour, &_min, &_sec) != 3) return printData(F("Bad time format (HH:MM:SS)"), true);
+  if(sscanf(_date, "%d/%d/%d", &_year, &_month, &_day) != 3)
+    return printData(F("Bad date format (YYYY/MM/DD)"), true);
+
+  if(sscanf(_time, "%d:%d:%d", &_hour, &_min, &_sec) != 3)
+    return printData(F("Bad time format (HH:MM:SS)"), true);
   
   if(_hour < 0 || _hour > 23) {
     printData(F("ERROR! Hour out of range: "), false);
@@ -126,7 +129,7 @@ void setDateTime(char *_date, char *_time) {
   }
 
   if(_year < 2018) {
-    printData(F("ERROR! Unless you'v travelled back in time, you cannot be in the year "), false);
+    printData(F("ERROR! Unless you've travelled back in time, you cannot be in the year "), false);
     printData(String(_year) + ".", true); 
     return;
   }

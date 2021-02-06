@@ -14,16 +14,16 @@ void setup() {
 
   Serial.print(F("Starting I2C port: "));
   Wire.begin();
-  Serial.println(F("done...\n"));
+  Serial.println(F("done..."));
 
   Serial.print(F("Starting RTC clock: "));
   RTC.begin();
-  Serial.println(F("done...\n"));
+  Serial.println(F("done..."));
 
   // Start the telnet server
   Serial.print(F("Starting telnet server: "));
   server.begin();
-  Serial.println(F("done...\n"));
+  Serial.println(F("done..."));
   
   loadSystemData();
 
